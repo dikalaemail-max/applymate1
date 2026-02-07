@@ -1,1 +1,4 @@
 project_id = "eyioyqtarlikggdlcvth"
+
+[functions.parse-scholarship]
+verify_jwt = false

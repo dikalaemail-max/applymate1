@@ -9,6 +9,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Plus, FolderOpen, Clock, Send, Trophy, TrendingUp, FileText, Target } from "lucide-react";
 import { format, differenceInDays, isPast, subDays } from "date-fns";
+import { AdvisorCard } from "@/components/AdvisorCard";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Scholarship = Tables<"scholarships">;
@@ -104,9 +105,11 @@ export default function Dashboard() {
           ))}
         </div>
 
+        {/* AI Advisor */}
+        <AdvisorCard scholarships={scholarships} loading={loading} />
+
         {/* Middle Row: Progress + Quick Stats */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          {/* Completion Rate */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -123,7 +126,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Quick Stats */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">
@@ -151,7 +153,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Status Breakdown */}
           <Card>
             <CardHeader className="pb-2">
               <CardTitle className="text-lg flex items-center gap-2">

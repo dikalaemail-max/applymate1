@@ -13,6 +13,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Trash2, ExternalLink, Share2, Copy, Upload } from "lucide-react";
 import { format } from "date-fns";
+import { EssayAssistant } from "@/components/EssayAssistant";
+import { ApplicationChecklist } from "@/components/ApplicationChecklist";
 import type { Tables, Database } from "@/integrations/supabase/types";
 
 type Scholarship = Tables<"scholarships">;
@@ -137,7 +139,7 @@ export default function ScholarshipDetail() {
   if (!scholarship) {
     return (
       <DashboardLayout>
-        <p className="text-muted-foreground">Scholarship not found.</p>
+        <p className="text-muted-foreground">Application not found.</p>
       </DashboardLayout>
     );
   }
@@ -256,6 +258,10 @@ export default function ScholarshipDetail() {
             )}
           </CardContent>
         </Card>
+
+        <ApplicationChecklist scholarship={scholarship} />
+
+        <EssayAssistant scholarship={scholarship} />
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between">

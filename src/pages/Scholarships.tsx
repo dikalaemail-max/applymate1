@@ -436,7 +436,8 @@ export default function Scholarships() {
               </p>
             )}
 
-            {/* List */}
+        {/* List */}
+            <DragDropContext onDragEnd={handleDragEnd}>
             <TabsContent value="active" className="mt-0">
               {loading ? (
                 <div className="flex justify-center py-12">
@@ -452,16 +453,14 @@ export default function Scholarships() {
                   </CardContent>
                 </Card>
               ) : isDragEnabled && !compact ? (
-                <DragDropContext onDragEnd={handleDragEnd}>
-                  <Droppable droppableId="scholarships">
-                    {(provided) => (
-                      <div ref={provided.innerRef} {...provided.droppableProps} className="grid gap-2">
-                        {filtered.map((s, i) => renderCard(s, i))}
-                        {provided.placeholder}
-                      </div>
-                    )}
-                  </Droppable>
-                </DragDropContext>
+                <Droppable droppableId="scholarships">
+                  {(provided) => (
+                    <div ref={provided.innerRef} {...provided.droppableProps} className="grid gap-2">
+                      {filtered.map((s, i) => renderCard(s, i))}
+                      {provided.placeholder}
+                    </div>
+                  )}
+                </Droppable>
               ) : (
                 <div className={compact ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" : "grid gap-2"}>
                   {filtered.map((s, i) => renderCard(s, i))}
@@ -486,6 +485,7 @@ export default function Scholarships() {
                 </div>
               )}
             </TabsContent>
+            </DragDropContext>
           </div>
         </Tabs>
       </div>

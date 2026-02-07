@@ -8,3 +8,9 @@ verify_jwt = false
 
 [functions.ai-advisor]
 verify_jwt = false
+
+[functions.parse-cv]
+verify_jwt = false
+
+[functions.success-meter]
+verify_jwt = false

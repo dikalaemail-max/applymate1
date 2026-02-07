@@ -14,6 +14,7 @@ import { useToast } from "@/hooks/use-toast";
 import { ArrowLeft, Trash2, ExternalLink, Share2, Copy, Upload, Archive, ArchiveRestore, Star } from "lucide-react";
 import { format } from "date-fns";
 import { EssayAssistant } from "@/components/EssayAssistant";
+import { SuccessMeter } from "@/components/SuccessMeter";
 import { ApplicationChecklist } from "@/components/ApplicationChecklist";
 import type { Tables, Database } from "@/integrations/supabase/types";
 
@@ -284,6 +285,8 @@ export default function ScholarshipDetail() {
             )}
           </CardContent>
         </Card>
+
+        <SuccessMeter scholarship={scholarship} />
 
         <ApplicationChecklist scholarship={scholarship} />
 

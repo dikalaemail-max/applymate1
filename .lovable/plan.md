@@ -1,58 +1,46 @@
 
 
-# 📚 ScholarTrack — Scholarship Application Manager
+# Smart Scholarship Auto-Fill
 
-A full-stack dashboard app to help you track, manage, and never miss a scholarship deadline again.
+Add two quick-entry methods above the existing form so users can rapidly add scholarships without manually filling every field.
 
----
+## How It Works
 
-## 🔐 Authentication
-- **Google Sign-In** (continue with Google) for quick, frictionless login
-- Email/password signup as a fallback option
-- Protected routes — unauthenticated users redirected to login
+**Option A -- Paste Text**: A large text box where users paste raw scholarship info (from an email, flyer, etc.). AI parses it and fills the form fields below.
 
-## 👤 User Dashboard (Main Experience)
-- **Overview page** with stats: total scholarships saved, upcoming deadlines, applications submitted, success rate
-- **Deadline timeline** showing upcoming due dates with urgency indicators (color-coded)
-- **Quick-add button** to rapidly save a new scholarship
+**Option B -- Paste a URL**: A URL input with a "Fetch" button. The system scrapes the webpage, then AI extracts scholarship details and fills the form.
 
-## 📋 Scholarship Manager
-- **Add/Edit scholarships** with fields: name, organization, amount, deadline, link, status (Saved → In Progress → Submitted → Awarded/Rejected), eligibility notes, and tags/categories
-- **Rich text notes** per scholarship — draft essays, talking points, requirements checklists
-- **File attachments** — upload PDFs (essays, transcripts, recommendation letters) stored in Supabase Storage
-- **Status board** — Kanban-style or table view to see all scholarships by status
-- **Search, filter & sort** — by deadline, amount, status, tags
+In both cases, the form fields are pre-populated but fully editable before saving.
 
-## 🔗 Sharing
-- **Share via link** — generate a public read-only link for any scholarship so friends can view details and apply
-- **Email invite** — send an invite so a friend sees the scholarship in their own dashboard
-- Shared scholarships appear in a "Shared with me" section
+## What Gets Built
 
-## 🛡️ Admin Panel
-- **User management** — view all registered users, see their activity
-- **User details** — inspect a user's scholarships and account info
-- **Delete/disable accounts** if needed
-- Role-based access using a secure `user_roles` table (admin vs. user)
+### 1. Backend function: `parse-scholarship`
+A single backend function that handles both modes:
+- **Text mode**: Sends the pasted text to Lovable AI (Gemini Flash) with a structured extraction prompt, returns parsed fields (name, organization, amount, deadline, link, eligibility, tags).
+- **URL mode**: Uses Firecrawl to scrape the webpage into markdown, then sends that markdown to Lovable AI for the same structured extraction.
 
-## 🗄️ Backend (Supabase)
-- **Database tables**: profiles, scholarships, scholarship_files, user_roles, shared_scholarships
-- **Supabase Storage** for document uploads (essays, transcripts, etc.)
-- **Row-Level Security** on all tables so users only see their own data (admins see all)
-- **Google OAuth** configured through Supabase Auth
+Uses tool calling to get clean JSON output matching the form fields.
 
-## 🎨 Design
-- Dashboard-style layout with a sidebar navigation
-- Data-dense views with stats cards, progress indicators, and deadline countdowns
-- Clean data tables with inline status badges
-- Mobile-responsive design
-- Dark/light mode support
+### 2. Firecrawl connector
+Firecrawl will be connected to enable webpage scraping. This lets the backend fetch and parse any scholarship URL the user provides.
 
-## 📄 Pages
-1. **Auth page** — Login / Sign up with Google
-2. **Dashboard** — Overview stats + upcoming deadlines
-3. **My Scholarships** — Full list with filters, search, and status management
-4. **Scholarship Detail** — View/edit a single scholarship, notes, and files
-5. **Shared with Me** — Scholarships friends have shared
-6. **Admin: Users** — User list and management (admin only)
-7. **Settings** — Profile, preferences
+### 3. Updated Add Scholarship page
+The form page gets a new "Smart Import" section at the top with two tabs:
+- **Paste Text** tab: A large textarea + "Extract" button
+- **From URL** tab: A URL input + "Fetch & Extract" button
+
+When the user clicks either button:
+- A loading spinner shows while processing
+- On success, all form fields below auto-populate with extracted data
+- A toast confirms "Fields auto-filled -- review and save!"
+- The user can edit any field before hitting Save
+
+## Technical Details
+
+- **AI Model**: `google/gemini-3-flash-preview` (fast, cost-effective for extraction)
+- **Scraping**: Firecrawl `/v1/scrape` with `markdown` format and `onlyMainContent: true`
+- **Structured output**: Tool calling to extract `name`, `organization`, `amount`, `deadline`, `link`, `eligibility_notes`, `tags` as clean JSON
+- **Edge function**: `supabase/functions/parse-scholarship/index.ts` -- handles both `{ text: "..." }` and `{ url: "..." }` request bodies
+- **Error handling**: Graceful fallback if scraping fails or AI can't extract certain fields (leaves them empty for manual entry)
+- **Security**: Function requires authentication (JWT verification enabled)
 

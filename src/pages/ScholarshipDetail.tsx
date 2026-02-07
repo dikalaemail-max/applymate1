@@ -147,11 +147,11 @@ export default function ScholarshipDetail() {
   return (
     <DashboardLayout>
       <div className="max-w-3xl mx-auto space-y-6">
-        <div className="flex items-center justify-between">
-          <Button variant="ghost" onClick={() => navigate("/scholarships")} className="gap-2">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <Button variant="ghost" onClick={() => navigate("/scholarships")} className="gap-2 w-fit">
             <ArrowLeft className="h-4 w-4" /> Back
           </Button>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={handleShare}>
               <Share2 className="h-4 w-4 mr-1" /> Share
             </Button>
@@ -189,7 +189,7 @@ export default function ScholarshipDetail() {
           <CardContent className="space-y-4">
             {editing ? (
               <>
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Organization</Label>
                     <Input value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} />
@@ -232,7 +232,7 @@ export default function ScholarshipDetail() {
                 </div>
               </>
             ) : (
-              <div className="grid grid-cols-2 gap-y-3 gap-x-6 text-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
                 <div><span className="text-muted-foreground">Organization:</span> <span className="font-medium">{scholarship.organization || "—"}</span></div>
                 <div><span className="text-muted-foreground">Amount:</span> <span className="font-medium">{scholarship.amount ? `$${Number(scholarship.amount).toLocaleString()}` : "—"}</span></div>
                 <div><span className="text-muted-foreground">Deadline:</span> <span className="font-medium">{scholarship.deadline ? format(new Date(scholarship.deadline), "MMM d, yyyy") : "—"}</span></div>

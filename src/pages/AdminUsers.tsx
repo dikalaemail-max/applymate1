@@ -45,13 +45,13 @@ export default function AdminUsers() {
         </div>
 
         <Card>
-          <CardContent className="p-0">
+          <CardContent className="p-0 overflow-x-auto">
             {loading ? (
               <div className="flex justify-center py-12">
                 <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
               </div>
             ) : (
-              <Table>
+              <Table className="min-w-[400px]">
                 <TableHeader>
                   <TableRow>
                     <TableHead>Name</TableHead>

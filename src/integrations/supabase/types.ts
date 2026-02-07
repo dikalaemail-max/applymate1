@@ -47,6 +47,13 @@ export type Database = {
             foreignKeyName: "application_checklist_scholarship_id_fkey"
             columns: ["scholarship_id"]
             isOneToOne: false
+            referencedRelation: "public_shared_scholarships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "application_checklist_scholarship_id_fkey"
+            columns: ["scholarship_id"]
+            isOneToOne: false
             referencedRelation: "scholarships"
             referencedColumns: ["id"]
           },
@@ -81,6 +88,13 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "community_posts_scholarship_id_fkey"
+            columns: ["scholarship_id"]
+            isOneToOne: false
+            referencedRelation: "public_shared_scholarships"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "community_posts_scholarship_id_fkey"
             columns: ["scholarship_id"]
@@ -188,6 +202,13 @@ export type Database = {
             foreignKeyName: "scholarship_files_scholarship_id_fkey"
             columns: ["scholarship_id"]
             isOneToOne: false
+            referencedRelation: "public_shared_scholarships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "scholarship_files_scholarship_id_fkey"
+            columns: ["scholarship_id"]
+            isOneToOne: false
             referencedRelation: "scholarships"
             referencedColumns: ["id"]
           },
@@ -274,6 +295,13 @@ export type Database = {
             foreignKeyName: "shared_scholarships_scholarship_id_fkey"
             columns: ["scholarship_id"]
             isOneToOne: false
+            referencedRelation: "public_shared_scholarships"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "shared_scholarships_scholarship_id_fkey"
+            columns: ["scholarship_id"]
+            isOneToOne: false
             referencedRelation: "scholarships"
             referencedColumns: ["id"]
           },
@@ -299,7 +327,54 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      public_shared_scholarships: {
+        Row: {
+          amount: number | null
+          created_at: string | null
+          deadline: string | null
+          eligibility_notes: string | null
+          id: string | null
+          is_shared: boolean | null
+          link: string | null
+          name: string | null
+          notes: string | null
+          organization: string | null
+          status: Database["public"]["Enums"]["scholarship_status"] | null
+          tags: string[] | null
+          updated_at: string | null
+        }
+        Insert: {
+          amount?: number | null
+          created_at?: string | null
+          deadline?: string | null
+          eligibility_notes?: string | null
+          id?: string | null
+          is_shared?: boolean | null
+          link?: string | null
+          name?: string | null
+          notes?: string | null
+          organization?: string | null
+          status?: Database["public"]["Enums"]["scholarship_status"] | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Update: {
+          amount?: number | null
+          created_at?: string | null
+          deadline?: string | null
+          eligibility_notes?: string | null
+          id?: string | null
+          is_shared?: boolean | null
+          link?: string | null
+          name?: string | null
+          notes?: string | null
+          organization?: string | null
+          status?: Database["public"]["Enums"]["scholarship_status"] | null
+          tags?: string[] | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

@@ -76,13 +76,13 @@ export default function Dashboard() {
     <DashboardLayout>
       <div className="space-y-8 max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between animate-fade-up" style={{ animationDelay: '0ms' }}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-up" style={{ animationDelay: '0ms' }}>
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
             <p className="text-muted-foreground mt-1 text-sm">Your application overview</p>
           </div>
           <Link to="/scholarships/new">
-            <Button className="gradient-primary border-0 text-white shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:brightness-110 transition-all rounded-xl h-10 px-5">
+            <Button className="gradient-primary border-0 text-white shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:brightness-110 transition-all rounded-xl h-10 px-5 w-full sm:w-auto">
               <Plus className="h-4 w-4 mr-2" />
               Add Application
             </Button>

@@ -127,7 +127,7 @@ export default function Scholarships() {
   return (
     <DashboardLayout>
       <div className="space-y-6">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">My Applications</h1>
             <p className="text-muted-foreground mt-1">
@@ -223,7 +223,7 @@ export default function Scholarships() {
                 <Card className="hover:shadow-md transition-shadow cursor-pointer">
                   <CardContent className={compact ? "py-3 px-4" : "flex items-center justify-between py-4 px-5"}>
                     {compact ? (
-                      <div className="space-y-1">
+                      <div className="space-y-1 min-w-0">
                         <p className="font-semibold truncate text-sm">{s.name}</p>
                         <div className="flex items-center gap-2 flex-wrap">
                           <Badge className={`text-xs ${statusColors[s.status]}`}>{statusLabels[s.status]}</Badge>
@@ -236,7 +236,7 @@ export default function Scholarships() {
                         </div>
                       </div>
                     ) : (
-                      <>
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 w-full">
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center gap-2">
                             <p className="font-semibold truncate">{s.name}</p>
@@ -252,7 +252,7 @@ export default function Scholarships() {
                             </div>
                           )}
                         </div>
-                        <div className="flex items-center gap-3 shrink-0 ml-4">
+                        <div className="flex items-center gap-3 shrink-0">
                           {s.amount && <span className="text-sm font-semibold">${Number(s.amount).toLocaleString()}</span>}
                           {s.deadline && (
                             <span className={`text-xs ${getUrgencyColor(s.deadline)}`}>
@@ -261,7 +261,7 @@ export default function Scholarships() {
                           )}
                           <Badge className={statusColors[s.status]}>{statusLabels[s.status]}</Badge>
                         </div>
-                      </>
+                      </div>
                     )}
                   </CardContent>
                 </Card>

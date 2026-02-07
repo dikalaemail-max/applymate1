@@ -56,12 +56,12 @@ export default function SharedWithMe() {
           <div className="grid gap-3">
             {scholarships.map((s) => (
               <Card key={s.id}>
-                <CardContent className="flex items-center justify-between py-4 px-5">
+                <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-4 px-5">
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold truncate">{s.name}</p>
                     <p className="text-sm text-muted-foreground">{s.organization || "—"}</p>
                   </div>
-                  <div className="flex items-center gap-3 shrink-0 ml-4">
+                  <div className="flex items-center gap-3 shrink-0">
                     {s.amount && <span className="text-sm font-semibold">${Number(s.amount).toLocaleString()}</span>}
                     {s.deadline && <span className="text-xs text-muted-foreground">{format(new Date(s.deadline), "MMM d, yyyy")}</span>}
                     <Badge variant="secondary">{statusLabels[s.status]}</Badge>

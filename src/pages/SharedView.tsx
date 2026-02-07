@@ -64,7 +64,7 @@ export default function SharedView() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-2 gap-y-3 gap-x-6 text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-3 gap-x-6 text-sm">
               <div><span className="text-muted-foreground">Organization:</span> <span className="font-medium">{scholarship.organization || "—"}</span></div>
               <div><span className="text-muted-foreground">Amount:</span> <span className="font-medium">{scholarship.amount ? `$${Number(scholarship.amount).toLocaleString()}` : "—"}</span></div>
               <div><span className="text-muted-foreground">Deadline:</span> <span className="font-medium">{scholarship.deadline ? format(new Date(scholarship.deadline), "MMM d, yyyy") : "—"}</span></div>

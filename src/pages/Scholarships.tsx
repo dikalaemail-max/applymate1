@@ -62,8 +62,8 @@ export default function Scholarships() {
       <div className="space-y-6">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">My Scholarships</h1>
-            <p className="text-muted-foreground mt-1">{scholarships.length} scholarship{scholarships.length !== 1 ? "s" : ""} tracked</p>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">My Applications</h1>
+            <p className="text-muted-foreground mt-1">{scholarships.length} application{scholarships.length !== 1 ? "s" : ""} tracked</p>
           </div>
           <Link to="/scholarships/new">
             <Button>
@@ -77,7 +77,7 @@ export default function Scholarships() {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
             <Input
-              placeholder="Search scholarships..."
+              placeholder="Search applications..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="pl-9"
@@ -105,11 +105,11 @@ export default function Scholarships() {
         ) : filtered.length === 0 ? (
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-12">
-              <p className="text-muted-foreground mb-4">No scholarships found</p>
+              <p className="text-muted-foreground mb-4">No applications found</p>
               <Link to="/scholarships/new">
                 <Button variant="outline">
                   <Plus className="h-4 w-4 mr-2" />
-                  Add Your First Scholarship
+                  Add Your First Application
                 </Button>
               </Link>
             </CardContent>

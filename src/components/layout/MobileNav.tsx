@@ -1,12 +1,12 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, GraduationCap, Share2, Settings, Menu, X, BookOpen, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, FolderOpen, Share2, Settings, Menu, X, Rocket, Users, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: GraduationCap, label: "Scholarships", href: "/scholarships" },
+  { icon: FolderOpen, label: "My Applications", href: "/scholarships" },
   { icon: Share2, label: "Shared", href: "/shared" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
@@ -20,8 +20,8 @@ export function MobileNav() {
     <>
       <header className="md:hidden flex items-center justify-between px-4 py-3 bg-sidebar text-sidebar-foreground border-b border-sidebar-border">
         <div className="flex items-center gap-2">
-          <BookOpen className="h-6 w-6 text-sidebar-primary" />
-          <span className="text-lg font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>ScholarTrack</span>
+          <Rocket className="h-6 w-6 text-sidebar-primary" />
+          <span className="text-lg font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>ApplyMate</span>
         </div>
         <button onClick={() => setOpen(!open)}>
           {open ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}

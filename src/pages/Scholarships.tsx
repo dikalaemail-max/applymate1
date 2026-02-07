@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Tabs, TabsContent } from "@/components/ui/tabs";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import {
@@ -86,6 +86,7 @@ export default function Scholarships() {
   const [compact, setCompact] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [tab, setTab] = useState<"active" | "archived">("active");
+  const [showAllTags, setShowAllTags] = useState(false);
 
   const fetchScholarships = useCallback(async () => {
     if (!user) return;
@@ -367,16 +368,15 @@ export default function Scholarships() {
 
         {/* Tabs */}
         <Tabs value={tab} onValueChange={(v) => { setTab(v as "active" | "archived"); setSelectedIds(new Set()); }}>
-          <TabsList>
-            <TabsTrigger value="active" className="gap-1.5">
-              Active
-              <Badge variant="secondary" className="text-xs h-5 min-w-5 px-1">{activeScholarships.length}</Badge>
-            </TabsTrigger>
-            <TabsTrigger value="archived" className="gap-1.5">
-              <Archive className="h-3.5 w-3.5" /> Archived
-              <Badge variant="secondary" className="text-xs h-5 min-w-5 px-1">{archivedScholarships.length}</Badge>
-            </TabsTrigger>
-          </TabsList>
+          <Select value={tab} onValueChange={(v) => { setTab(v as "active" | "archived"); setSelectedIds(new Set()); }}>
+            <SelectTrigger className="w-auto gap-2 font-semibold text-sm">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="active">Active ({activeScholarships.length})</SelectItem>
+              <SelectItem value="archived">Archived ({archivedScholarships.length})</SelectItem>
+            </SelectContent>
+          </Select>
 
           <div className="mt-4 space-y-4">
             {/* Filters */}
@@ -419,21 +419,19 @@ export default function Scholarships() {
 
             {/* Tags */}
             {allTags.length > 0 && (
-              <div className="flex flex-wrap gap-1.5">
-                {allTags.map((tag) => (
+              <div className="flex flex-wrap gap-1.5 items-center">
+                {allTags.slice(0, showAllTags ? allTags.length : 5).map((tag) => (
                   <Badge key={tag} variant={selectedTags.includes(tag) ? "default" : "outline"} className="cursor-pointer" onClick={() => toggleTag(tag)}>
                     {tag}
                     {selectedTags.includes(tag) && <X className="h-3 w-3 ml-1" />}
                   </Badge>
                 ))}
+                {allTags.length > 5 && (
+                  <button onClick={() => setShowAllTags(!showAllTags)} className="text-xs text-primary hover:underline">
+                    {showAllTags ? "Show less" : `+${allTags.length - 5} more`}
+                  </button>
+                )}
               </div>
-            )}
-
-            {/* Drag hint */}
-            {isDragEnabled && filtered.length > 1 && !compact && (
-              <p className="text-xs text-muted-foreground flex items-center gap-1.5">
-                <GripVertical className="h-3 w-3" /> Drag to reorder your applications
-              </p>
             )}
 
         {/* List */}

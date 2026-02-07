@@ -377,6 +377,24 @@ export type Database = {
       }
     }
     Functions: {
+      get_shared_scholarship: {
+        Args: { _token: string }
+        Returns: {
+          amount: number
+          created_at: string
+          deadline: string
+          eligibility_notes: string
+          id: string
+          is_shared: boolean
+          link: string
+          name: string
+          notes: string
+          organization: string
+          status: Database["public"]["Enums"]["scholarship_status"]
+          tags: string[]
+          updated_at: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

@@ -5,8 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { Rocket, Mail } from "lucide-react";
+import { Rocket, Mail, ArrowRight } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
@@ -75,71 +74,85 @@ export default function Auth() {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="w-full max-w-md space-y-6">
-        <div className="flex flex-col items-center gap-2">
-          <div className="flex items-center gap-2">
-            <Rocket className="h-9 w-9 text-primary" />
-            <h1 className="text-3xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden px-4">
+      {/* Mesh gradient background */}
+      <div className="absolute inset-0 mesh-gradient bg-background" />
+      
+      {/* Floating orbs */}
+      <div className="absolute top-1/4 -left-20 w-72 h-72 rounded-full gradient-primary opacity-20 blur-3xl animate-float" />
+      <div className="absolute bottom-1/4 -right-20 w-96 h-96 rounded-full bg-[hsl(var(--gradient-end))] opacity-15 blur-3xl animate-float" style={{ animationDelay: '1.5s' }} />
+
+      <div className="relative z-10 w-full max-w-md space-y-8 animate-fade-up">
+        {/* Logo */}
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex items-center gap-3">
+            <div className="gradient-primary p-2.5 rounded-2xl shadow-lg">
+              <Rocket className="h-7 w-7 text-white" />
+            </div>
+            <h1 className="text-4xl font-bold tracking-tight gradient-text" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               ApplyMate
             </h1>
           </div>
-          <p className="text-muted-foreground text-center">
+          <p className="text-muted-foreground text-center text-sm">
             Track applications, never miss a deadline
           </p>
         </div>
 
-        <Card>
-          <CardHeader className="text-center">
-            <CardTitle>{isLogin ? "Welcome back" : "Create an account"}</CardTitle>
-            <CardDescription>
-              {isLogin ? "Sign in to your account" : "Sign up to start tracking applications"}
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="you@example.com"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="••••••••"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                />
-              </div>
-              <Button type="submit" className="w-full" disabled={submitting}>
-                <Mail className="h-4 w-4 mr-2" />
-                {isLogin ? "Sign In" : "Sign Up"}
-              </Button>
-            </form>
+        {/* Card */}
+        <div className="glass-card rounded-2xl p-8 space-y-6">
+          <div className="text-center space-y-1">
+            <h2 className="text-2xl font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
+              {isLogin ? "Welcome back" : "Get started"}
+            </h2>
+            <p className="text-sm text-muted-foreground">
+              {isLogin ? "Sign in to your account" : "Create your free account"}
+            </p>
+          </div>
 
-            <div className="text-center text-sm">
-              <span className="text-muted-foreground">
-                {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
-              </span>
-              <button
-                type="button"
-                onClick={() => setIsLogin(!isLogin)}
-                className="text-primary font-medium hover:underline"
-              >
-                {isLogin ? "Sign up" : "Sign in"}
-              </button>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="email" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="you@example.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                required
+                className="h-12 rounded-xl bg-muted/50 border-transparent focus:border-primary/50 focus:bg-background transition-all"
+              />
             </div>
-          </CardContent>
-        </Card>
+            <div className="space-y-2">
+              <Label htmlFor="password" className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Password</Label>
+              <Input
+                id="password"
+                type="password"
+                placeholder="••••••••"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                required
+                className="h-12 rounded-xl bg-muted/50 border-transparent focus:border-primary/50 focus:bg-background transition-all"
+              />
+            </div>
+            <Button type="submit" className="w-full h-12 rounded-xl gradient-primary border-0 text-white font-semibold text-sm shadow-lg shadow-primary/25 hover:shadow-primary/40 hover:brightness-110 transition-all" disabled={submitting}>
+              {isLogin ? "Sign In" : "Create Account"}
+              <ArrowRight className="h-4 w-4 ml-2" />
+            </Button>
+          </form>
+
+          <div className="text-center text-sm">
+            <span className="text-muted-foreground">
+              {isLogin ? "Don't have an account?" : "Already have an account?"}{" "}
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsLogin(!isLogin)}
+              className="text-primary font-semibold hover:underline"
+            >
+              {isLogin ? "Sign up" : "Sign in"}
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

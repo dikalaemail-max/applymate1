@@ -1,19 +1,19 @@
 import { Link, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
-  GraduationCap,
+  FolderOpen,
   Share2,
   Users,
   Settings,
   LogOut,
-  BookOpen,
+  Rocket,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-  { icon: GraduationCap, label: "My Scholarships", href: "/scholarships" },
+  { icon: FolderOpen, label: "My Applications", href: "/scholarships" },
   { icon: Share2, label: "Shared with Me", href: "/shared" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
@@ -29,9 +29,9 @@ export function AppSidebar() {
   return (
     <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border">
       <div className="flex items-center gap-2 px-6 py-5 border-b border-sidebar-border">
-        <BookOpen className="h-7 w-7 text-sidebar-primary" />
+        <Rocket className="h-7 w-7 text-sidebar-primary" />
         <span className="text-xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-          ScholarTrack
+          ApplyMate
         </span>
       </div>
 

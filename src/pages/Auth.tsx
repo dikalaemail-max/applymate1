@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Mail } from "lucide-react";
+import { Rocket, Mail } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
@@ -79,13 +79,13 @@ export default function Auth() {
       <div className="w-full max-w-md space-y-6">
         <div className="flex flex-col items-center gap-2">
           <div className="flex items-center gap-2">
-            <BookOpen className="h-9 w-9 text-primary" />
+            <Rocket className="h-9 w-9 text-primary" />
             <h1 className="text-3xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
-              ScholarTrack
+              ApplyMate
             </h1>
           </div>
           <p className="text-muted-foreground text-center">
-            Never miss a scholarship deadline again
+            Track applications, never miss a deadline
           </p>
         </div>
 
@@ -93,7 +93,7 @@ export default function Auth() {
           <CardHeader className="text-center">
             <CardTitle>{isLogin ? "Welcome back" : "Create an account"}</CardTitle>
             <CardDescription>
-              {isLogin ? "Sign in to your account" : "Sign up to start tracking scholarships"}
+              {isLogin ? "Sign in to your account" : "Sign up to start tracking applications"}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">

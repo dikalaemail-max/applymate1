@@ -14,6 +14,44 @@ export type Database = {
   }
   public: {
     Tables: {
+      application_checklist: {
+        Row: {
+          created_at: string | null
+          id: string
+          is_done: boolean
+          label: string
+          position: number
+          scholarship_id: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          is_done?: boolean
+          label: string
+          position?: number
+          scholarship_id: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          is_done?: boolean
+          label?: string
+          position?: number
+          scholarship_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "application_checklist_scholarship_id_fkey"
+            columns: ["scholarship_id"]
+            isOneToOne: false
+            referencedRelation: "scholarships"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           avatar_url: string | null

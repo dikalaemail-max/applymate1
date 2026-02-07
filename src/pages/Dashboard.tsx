@@ -32,18 +32,19 @@ export default function Dashboard() {
       });
   }, [user]);
 
-  const total = scholarships.length;
-  const submitted = scholarships.filter((s) => s.status === "submitted").length;
-  const awarded = scholarships.filter((s) => s.status === "awarded").length;
-  const inProgress = scholarships.filter((s) => s.status === "in_progress").length;
-  const rejected = scholarships.filter((s) => s.status === "rejected").length;
-  const upcoming = scholarships.filter(
+  const active = scholarships.filter((s) => s.status !== "archived");
+  const total = active.length;
+  const submitted = active.filter((s) => s.status === "submitted").length;
+  const awarded = active.filter((s) => s.status === "awarded").length;
+  const inProgress = active.filter((s) => s.status === "in_progress").length;
+  const rejected = active.filter((s) => s.status === "rejected").length;
+  const upcoming = active.filter(
     (s) => s.deadline && !isPast(new Date(s.deadline)) && s.status !== "submitted" && s.status !== "awarded" && s.status !== "rejected"
   );
-  const totalAmount = scholarships
+  const totalAmount = active
     .filter((s) => s.status === "awarded")
     .reduce((sum, s) => sum + (Number(s.amount) || 0), 0);
-  const recentlyAdded = scholarships
+  const recentlyAdded = active
     .filter((s) => new Date(s.created_at) >= subDays(new Date(), 7))
     .length;
 
@@ -65,7 +66,7 @@ export default function Dashboard() {
   };
 
   const statusBreakdown = [
-    { label: "Saved", count: scholarships.filter((s) => s.status === "saved").length, color: "bg-secondary" },
+    { label: "Saved", count: active.filter((s) => s.status === "saved").length, color: "bg-secondary" },
     { label: "In Progress", count: inProgress, color: "bg-blue-500" },
     { label: "Submitted", count: submitted, color: "bg-purple-500" },
     { label: "Awarded", count: awarded, color: "bg-emerald-500" },

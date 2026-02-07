@@ -221,11 +221,13 @@ export type Database = {
           deadline: string | null
           eligibility_notes: string | null
           id: string
+          is_favorited: boolean | null
           is_shared: boolean
           link: string | null
           name: string
           notes: string | null
           organization: string | null
+          position: number | null
           share_token: string | null
           status: Database["public"]["Enums"]["scholarship_status"]
           tags: string[] | null
@@ -238,11 +240,13 @@ export type Database = {
           deadline?: string | null
           eligibility_notes?: string | null
           id?: string
+          is_favorited?: boolean | null
           is_shared?: boolean
           link?: string | null
           name: string
           notes?: string | null
           organization?: string | null
+          position?: number | null
           share_token?: string | null
           status?: Database["public"]["Enums"]["scholarship_status"]
           tags?: string[] | null
@@ -255,11 +259,13 @@ export type Database = {
           deadline?: string | null
           eligibility_notes?: string | null
           id?: string
+          is_favorited?: boolean | null
           is_shared?: boolean
           link?: string | null
           name?: string
           notes?: string | null
           organization?: string | null
+          position?: number | null
           share_token?: string | null
           status?: Database["public"]["Enums"]["scholarship_status"]
           tags?: string[] | null
@@ -411,6 +417,7 @@ export type Database = {
         | "submitted"
         | "awarded"
         | "rejected"
+        | "archived"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -545,6 +552,7 @@ export const Constants = {
         "submitted",
         "awarded",
         "rejected",
+        "archived",
       ],
     },
   },

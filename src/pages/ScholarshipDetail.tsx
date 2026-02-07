@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Trash2, ExternalLink, Share2, Copy, Upload } from "lucide-react";
+import { ArrowLeft, Trash2, ExternalLink, Share2, Copy, Upload, Archive, ArchiveRestore, Star } from "lucide-react";
 import { format } from "date-fns";
 import { EssayAssistant } from "@/components/EssayAssistant";
 import { ApplicationChecklist } from "@/components/ApplicationChecklist";
@@ -22,7 +22,7 @@ type ScholarshipFile = Tables<"scholarship_files">;
 type ScholarshipStatus = Database["public"]["Enums"]["scholarship_status"];
 
 const statusLabels: Record<string, string> = {
-  saved: "Saved", in_progress: "In Progress", submitted: "Submitted", awarded: "Awarded", rejected: "Rejected",
+  saved: "Saved", in_progress: "In Progress", submitted: "Submitted", awarded: "Awarded", rejected: "Rejected", archived: "Archived",
 };
 
 export default function ScholarshipDetail() {
@@ -148,12 +148,38 @@ export default function ScholarshipDetail() {
     <DashboardLayout>
       <div className="max-w-3xl mx-auto space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <Button variant="ghost" onClick={() => navigate("/scholarships")} className="gap-2 w-fit">
-            <ArrowLeft className="h-4 w-4" /> Back
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button variant="ghost" onClick={() => navigate("/scholarships")} className="gap-2 w-fit">
+              <ArrowLeft className="h-4 w-4" /> Back
+            </Button>
+            <button
+              onClick={async () => {
+                const newVal = !scholarship.is_favorited;
+                await supabase.from("scholarships").update({ is_favorited: newVal }).eq("id", scholarship.id);
+                setScholarship({ ...scholarship, is_favorited: newVal });
+              }}
+              className="p-2 rounded-lg hover:bg-accent transition-colors"
+            >
+              <Star className={`h-4 w-4 ${scholarship.is_favorited ? "text-amber-400 fill-amber-400" : "text-muted-foreground"}`} />
+            </button>
+          </div>
           <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={handleShare}>
               <Share2 className="h-4 w-4 mr-1" /> Share
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={async () => {
+                const newStatus = scholarship.status === "archived" ? "saved" : "archived";
+                await supabase.from("scholarships").update({ status: newStatus }).eq("id", scholarship.id);
+                setScholarship({ ...scholarship, status: newStatus as ScholarshipStatus });
+                toast({ title: newStatus === "archived" ? "Archived" : "Restored" });
+              }}
+              className="gap-1"
+            >
+              {scholarship.status === "archived" ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
+              {scholarship.status === "archived" ? "Restore" : "Archive"}
             </Button>
             {!editing ? (
               <Button size="sm" onClick={() => setEditing(true)}>Edit</Button>

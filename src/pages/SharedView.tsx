@@ -7,7 +7,7 @@ import { BookOpen, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import type { Tables } from "@/integrations/supabase/types";
 
-type Scholarship = Tables<"scholarships">;
+type SharedScholarship = Omit<Tables<"scholarships">, "share_token" | "user_id">;
 
 const statusLabels: Record<string, string> = {
   saved: "Saved", in_progress: "In Progress", submitted: "Submitted", awarded: "Awarded", rejected: "Rejected",
@@ -15,19 +15,15 @@ const statusLabels: Record<string, string> = {
 
 export default function SharedView() {
   const { token } = useParams<{ token: string }>();
-  const [scholarship, setScholarship] = useState<Scholarship | null>(null);
+  const [scholarship, setScholarship] = useState<SharedScholarship | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     if (!token) return;
     supabase
-      .from("scholarships")
-      .select("*")
-      .eq("share_token", token)
-      .eq("is_shared", true)
-      .single()
+      .rpc("get_shared_scholarship", { _token: token })
       .then(({ data }) => {
-        setScholarship(data);
+        setScholarship(data?.[0] ?? null);
         setLoading(false);
       });
   }, [token]);

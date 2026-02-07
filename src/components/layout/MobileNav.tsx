@@ -1,5 +1,5 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, FolderOpen, Share2, Settings, Menu, X, Rocket, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, FolderOpen, Share2, MessageCircle, Settings, Menu, X, Rocket, Users, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
@@ -8,6 +8,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: FolderOpen, label: "My Applications", href: "/scholarships" },
   { icon: Share2, label: "Shared", href: "/shared" },
+  { icon: MessageCircle, label: "Community", href: "/community" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
 

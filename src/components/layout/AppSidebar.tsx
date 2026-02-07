@@ -3,6 +3,7 @@ import {
   LayoutDashboard,
   FolderOpen,
   Share2,
+  MessageCircle,
   Users,
   Settings,
   LogOut,
@@ -15,6 +16,7 @@ const navItems = [
   { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
   { icon: FolderOpen, label: "My Applications", href: "/scholarships" },
   { icon: Share2, label: "Shared with Me", href: "/shared" },
+  { icon: MessageCircle, label: "Community", href: "/community" },
   { icon: Settings, label: "Settings", href: "/settings" },
 ];
 

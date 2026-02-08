@@ -4,11 +4,10 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import {
-  Plus, FolderOpen, Clock, Send, Trophy, TrendingUp, FileText, Target, ArrowRight,
+  Plus, FolderOpen, Clock, Send, Trophy, TrendingUp, FileText, ArrowRight,
   CalendarDays, DollarSign, Flame, Award, BarChart3, Sparkles,
 } from "lucide-react";
 import { format, differenceInDays, isPast, subDays, isThisWeek } from "date-fns";
@@ -17,6 +16,11 @@ import { ActivityTimeline } from "@/components/ActivityTimeline";
 import { DeadlineCalendar } from "@/components/DeadlineCalendar";
 import { QuickNotes } from "@/components/QuickNotes";
 import { InsightsChart } from "@/components/InsightsChart";
+import { QuickActions } from "@/components/QuickActions";
+import { FocusNext } from "@/components/FocusNext";
+import { StreakCounter } from "@/components/StreakCounter";
+import { GoalTracker } from "@/components/GoalTracker";
+import { ScholarshipRecommender } from "@/components/ScholarshipRecommender";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Scholarship = Tables<"scholarships">;
@@ -26,6 +30,7 @@ export default function Dashboard() {
   const [scholarships, setScholarships] = useState<Scholarship[]>([]);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<any>(null);
+  const [briefLoading, setBriefLoading] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -36,6 +41,10 @@ export default function Dashboard() {
       setScholarships(schData || []);
       setProfile(profData);
       setLoading(false);
+      // Update last_active_at
+      if (profData) {
+        supabase.from("profiles").update({ last_active_at: new Date().toISOString() }).eq("user_id", user.id);
+      }
     });
   }, [user]);
 
@@ -64,16 +73,21 @@ export default function Dashboard() {
   const completionRate = total > 0 ? Math.round(((submitted + awarded) / total) * 100) : 0;
   const successRate = (submitted + awarded) > 0 ? Math.round((awarded / (submitted + awarded + rejected)) * 100) : 0;
 
-  // Deadlines this week
   const thisWeekDeadlines = upcoming.filter((s) => isThisWeek(new Date(s.deadline!), { weekStartsOn: 1 }));
 
-  // Profile completeness
   const profileFields = ['display_name', 'bio', 'education_level', 'major', 'gpa', 'skills', 'achievements'];
   const filledFields = profile ? profileFields.filter((f) => {
     const val = profile[f];
     return val && (Array.isArray(val) ? val.length > 0 : true);
   }).length : 0;
   const profileCompletion = Math.round((filledFields / profileFields.length) * 100);
+
+  // Monthly submitted count for goal tracker
+  const now = new Date();
+  const thisMonthSubmitted = scholarships.filter((s) => {
+    const created = new Date(s.created_at);
+    return created.getMonth() === now.getMonth() && created.getFullYear() === now.getFullYear();
+  }).length;
 
   const getUrgencyColor = (deadline: string) => {
     const days = differenceInDays(new Date(deadline), new Date());
@@ -92,35 +106,61 @@ export default function Dashboard() {
 
   const displayName = profile?.display_name || user?.email?.split("@")[0] || "there";
 
+  const handleBriefRequest = () => {
+    setBriefLoading(true);
+    // Trigger the AdvisorCard refresh — it handles its own fetch
+    const btn = document.querySelector('[data-advisor-refresh]') as HTMLButtonElement;
+    if (btn) btn.click();
+    setTimeout(() => setBriefLoading(false), 2000);
+  };
+
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-6xl mx-auto w-full min-w-0">
-        {/* Greeting */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-          <div>
-            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">
-              {greeting()}, <span className="font-serif-display italic font-normal">{displayName}</span>
-            </h1>
-            <p className="text-muted-foreground mt-0.5 text-sm">
-              {overdue.length > 0
-                ? `⚠ ${overdue.length} overdue deadline${overdue.length > 1 ? "s" : ""} need attention`
-                : thisWeekDeadlines.length > 0
-                ? `${thisWeekDeadlines.length} deadline${thisWeekDeadlines.length > 1 ? "s" : ""} this week`
-                : "You're all caught up!"}
-            </p>
+      <div className="space-y-8 max-w-6xl mx-auto w-full min-w-0">
+        {/* Header */}
+        <div className="space-y-4">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div>
+              <p className="section-label mb-2">Dashboard</p>
+              <h1 className="text-3xl md:text-4xl font-bold tracking-tight leading-tight">
+                {greeting()},<br />
+                <span className="font-serif-display italic font-normal text-muted-foreground">{displayName}</span>
+              </h1>
+              <p className="text-muted-foreground mt-1 text-sm">
+                {overdue.length > 0
+                  ? `⚠ ${overdue.length} overdue deadline${overdue.length > 1 ? "s" : ""} need attention`
+                  : thisWeekDeadlines.length > 0
+                  ? `${thisWeekDeadlines.length} deadline${thisWeekDeadlines.length > 1 ? "s" : ""} this week`
+                  : "You're all caught up!"}
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <StreakCounter streak={profile?.activity_streak || 0} />
+            </div>
           </div>
-          <Link to="/scholarships/new">
-            <Button className="bg-foreground text-background hover:bg-foreground/90 rounded-xl h-10 px-5 w-full sm:w-auto shadow-lg shadow-foreground/5">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Application
-            </Button>
-          </Link>
+          <QuickActions onBriefRequest={handleBriefRequest} briefLoading={briefLoading} scholarships={scholarships} />
         </div>
 
-        {/* Key Metrics */}
+        {/* Focus Next (full width, inverted card) */}
+        <FocusNext scholarships={scholarships} loading={loading} />
+
+        {/* Key Metrics — asymmetric: 1 large + 3 small */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          <Card className="glass-card rounded-2xl border-0 hover-lift col-span-2 lg:col-span-1 noise-texture">
+            <CardContent className="pt-6 pb-5 px-6">
+              <div className="flex items-start justify-between">
+                <div>
+                  <p className="text-4xl font-bold tracking-tighter tabular-nums">{loading ? "–" : total}</p>
+                  <p className="text-xs text-muted-foreground mt-1.5 font-medium">Active Applications</p>
+                </div>
+                <div className="p-2.5 rounded-xl bg-foreground/5">
+                  <FolderOpen className="h-4 w-4 text-foreground/60" />
+                </div>
+              </div>
+              <p className="text-[10px] mt-3 text-muted-foreground">{loading ? "" : `${recentlyAdded} added this week`}</p>
+            </CardContent>
+          </Card>
           {[
-            { label: "Active", value: total, icon: FolderOpen, sub: `${recentlyAdded} new this week` },
             { label: "Upcoming", value: upcoming.length, icon: Clock, sub: overdue.length > 0 ? `${overdue.length} overdue` : "On track", alert: overdue.length > 0 },
             { label: "Submitted", value: submitted, icon: Send, sub: `${inProgress} in progress` },
             { label: "Awarded", value: awarded, icon: Trophy, sub: totalAmount > 0 ? `$${totalAmount.toLocaleString()} won` : "Keep applying!" },
@@ -144,20 +184,31 @@ export default function Dashboard() {
           ))}
         </div>
 
-        {/* AI Advisor */}
-        <AdvisorCard scholarships={scholarships} loading={loading} />
+        {/* AI Advisor + Goal Tracker */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <div className="lg:col-span-2">
+            <AdvisorCard scholarships={scholarships} loading={loading} />
+          </div>
+          <GoalTracker
+            goal={profile?.monthly_goal || 5}
+            current={thisMonthSubmitted}
+            onGoalChange={(n) => setProfile((p: any) => ({ ...p, monthly_goal: n }))}
+          />
+        </div>
 
         {/* Insights + Calendar Row */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <InsightsChart scholarships={scholarships} loading={loading} />
-          <DeadlineCalendar
-            deadlines={upcoming.map((s) => ({ id: s.id, name: s.name, deadline: s.deadline! }))}
-          />
+        <div>
+          <p className="section-label mb-3">Analytics</p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <InsightsChart scholarships={scholarships} loading={loading} />
+            <DeadlineCalendar
+              deadlines={upcoming.map((s) => ({ id: s.id, name: s.name, deadline: s.deadline! }))}
+            />
+          </div>
         </div>
 
         {/* Financial + Progress Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-          {/* Financial Summary */}
           <Card className="glass-card rounded-2xl border-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
@@ -192,7 +243,6 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          {/* Progress Overview */}
           <Card className="glass-card rounded-2xl border-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
@@ -206,18 +256,14 @@ export default function Dashboard() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Completion</p>
-                  <div className="flex items-end gap-1.5">
-                    <span className="text-2xl font-bold tabular-nums">{loading ? "–" : `${completionRate}%`}</span>
-                  </div>
+                  <span className="text-2xl font-bold tabular-nums">{loading ? "–" : `${completionRate}%`}</span>
                   <div className="h-1.5 rounded-full bg-muted overflow-hidden mt-2">
                     <div className="h-full rounded-full bg-foreground transition-all duration-700" style={{ width: loading ? '0%' : `${completionRate}%` }} />
                   </div>
                 </div>
                 <div>
                   <p className="text-xs text-muted-foreground mb-1">Success Rate</p>
-                  <div className="flex items-end gap-1.5">
-                    <span className="text-2xl font-bold tabular-nums">{loading ? "–" : `${successRate}%`}</span>
-                  </div>
+                  <span className="text-2xl font-bold tabular-nums">{loading ? "–" : `${successRate}%`}</span>
                   <div className="h-1.5 rounded-full bg-muted overflow-hidden mt-2">
                     <div className="h-full rounded-full bg-success transition-all duration-700" style={{ width: loading ? '0%' : `${successRate}%` }} />
                   </div>
@@ -227,92 +273,92 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Status Pipeline + Profile Strength */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-          {/* Pipeline */}
-          <Card className="glass-card rounded-2xl border-0 lg:col-span-2">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-foreground/5">
-                  <Flame className="h-3.5 w-3.5" />
-                </div>
-                Application Pipeline
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              {loading ? (
-                <p className="text-sm text-muted-foreground">Loading...</p>
-              ) : total === 0 ? (
-                <p className="text-sm text-muted-foreground py-4">Add your first application to see your pipeline.</p>
-              ) : (
-                <div className="space-y-3">
-                  {/* Visual bar */}
-                  <div className="flex h-4 rounded-full overflow-hidden bg-muted">
-                    {[
-                      { count: saved, color: "bg-muted-foreground/40" },
-                      { count: inProgress, color: "bg-foreground/60" },
-                      { count: submitted, color: "bg-foreground" },
-                      { count: awarded, color: "bg-success" },
-                      { count: rejected, color: "bg-destructive" },
-                    ].map((seg, i) => seg.count > 0 && (
-                      <div key={i} className={`${seg.color} transition-all duration-500`} style={{ width: `${(seg.count / total) * 100}%` }} />
-                    ))}
+        {/* Pipeline + Profile Strength */}
+        <div>
+          <p className="section-label mb-3">Pipeline</p>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+            <Card className="glass-card rounded-2xl border-0 lg:col-span-2">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-foreground/5">
+                    <Flame className="h-3.5 w-3.5" />
                   </div>
-                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                    {[
-                      { label: "Saved", count: saved },
-                      { label: "In Progress", count: inProgress },
-                      { label: "Submitted", count: submitted },
-                      { label: "Awarded", count: awarded },
-                      { label: "Rejected", count: rejected },
-                    ].map((item) => (
-                      <div key={item.label} className="text-center">
-                        <p className="text-lg font-bold tabular-nums">{item.count}</p>
-                        <p className="text-[10px] text-muted-foreground">{item.label}</p>
-                      </div>
-                    ))}
+                  Application Pipeline
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loading ? (
+                  <p className="text-sm text-muted-foreground">Loading...</p>
+                ) : total === 0 ? (
+                  <p className="text-sm text-muted-foreground py-4">Add your first application to see your pipeline.</p>
+                ) : (
+                  <div className="space-y-3">
+                    <div className="flex h-4 rounded-full overflow-hidden bg-muted">
+                      {[
+                        { count: saved, color: "bg-muted-foreground/40" },
+                        { count: inProgress, color: "bg-foreground/60" },
+                        { count: submitted, color: "bg-foreground" },
+                        { count: awarded, color: "bg-success" },
+                        { count: rejected, color: "bg-destructive" },
+                      ].map((seg, i) => seg.count > 0 && (
+                        <div key={i} className={`${seg.color} transition-all duration-500`} style={{ width: `${(seg.count / total) * 100}%` }} />
+                      ))}
+                    </div>
+                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
+                      {[
+                        { label: "Saved", count: saved },
+                        { label: "In Progress", count: inProgress },
+                        { label: "Submitted", count: submitted },
+                        { label: "Awarded", count: awarded },
+                        { label: "Rejected", count: rejected },
+                      ].map((item) => (
+                        <div key={item.label} className="text-center">
+                          <p className="text-lg font-bold tabular-nums">{item.count}</p>
+                          <p className="text-[10px] text-muted-foreground">{item.label}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                )}
+              </CardContent>
+            </Card>
 
-          {/* Profile Strength */}
-          <Card className="glass-card rounded-2xl border-0">
-            <CardHeader className="pb-2">
-              <CardTitle className="text-base flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-foreground/5">
-                  <Award className="h-3.5 w-3.5" />
+            <Card className="glass-card rounded-2xl border-0">
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base flex items-center gap-2">
+                  <div className="p-1.5 rounded-lg bg-foreground/5">
+                    <Award className="h-3.5 w-3.5" />
+                  </div>
+                  Profile Strength
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="relative w-20 h-20 mx-auto">
+                  <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
+                    <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
+                      fill="none" stroke="hsl(var(--foreground))" strokeWidth="3"
+                      strokeDasharray={`${profileCompletion}, 100`}
+                      className="transition-all duration-1000" />
+                  </svg>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-lg font-bold tabular-nums">{loading ? "–" : `${profileCompletion}%`}</span>
+                  </div>
                 </div>
-                Profile Strength
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              <div className="relative w-20 h-20 mx-auto">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
-                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none" stroke="hsl(var(--muted))" strokeWidth="3" />
-                  <path d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"
-                    fill="none" stroke="hsl(var(--foreground))" strokeWidth="3"
-                    strokeDasharray={`${profileCompletion}, 100`}
-                    className="transition-all duration-1000" />
-                </svg>
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <span className="text-lg font-bold tabular-nums">{loading ? "–" : `${profileCompletion}%`}</span>
-                </div>
-              </div>
-              <p className="text-xs text-muted-foreground text-center">
-                {profileCompletion === 100 ? "Profile complete! 🎉" : "Complete your profile for better AI matches."}
-              </p>
-              {profileCompletion < 100 && (
-                <Link to="/settings" className="block">
-                  <Button variant="outline" size="sm" className="w-full rounded-xl text-xs">
-                    Complete Profile
-                  </Button>
-                </Link>
-              )}
-            </CardContent>
-          </Card>
+                <p className="text-xs text-muted-foreground text-center">
+                  {profileCompletion === 100 ? "Profile complete! 🎉" : "Complete your profile for better AI matches."}
+                </p>
+                {profileCompletion < 100 && (
+                  <Link to="/settings" className="block">
+                    <Button variant="outline" size="sm" className="w-full rounded-xl text-xs">
+                      Complete Profile
+                    </Button>
+                  </Link>
+                )}
+              </CardContent>
+            </Card>
+          </div>
         </div>
 
         {/* Upcoming Deadlines */}
@@ -346,7 +392,6 @@ export default function Dashboard() {
               </div>
             ) : (
               <div className="space-y-1">
-                {/* Overdue first */}
                 {overdue.map((s) => (
                    <Link
                      key={s.id}
@@ -390,53 +435,13 @@ export default function Dashboard() {
           </CardContent>
         </Card>
 
+        {/* AI Recommender */}
+        <ScholarshipRecommender profile={profile} />
+
         {/* Activity Timeline + Quick Notes */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
           <ActivityTimeline />
           <QuickNotes />
-        </div>
-
-        {/* Quick Actions */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <Link to="/scholarships/new" className="block">
-            <Card className="glass-card rounded-2xl border-0 hover-lift cursor-pointer group">
-              <CardContent className="py-5 px-5 flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-foreground/5 group-hover:bg-foreground group-hover:text-background transition-colors">
-                  <Plus className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">New Application</p>
-                  <p className="text-xs text-muted-foreground">Track a scholarship</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link to="/community" className="block">
-            <Card className="glass-card rounded-2xl border-0 hover-lift cursor-pointer group">
-              <CardContent className="py-5 px-5 flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-foreground/5 group-hover:bg-foreground group-hover:text-background transition-colors">
-                  <TrendingUp className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">Community</p>
-                  <p className="text-xs text-muted-foreground">Tips & discussions</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-          <Link to="/settings" className="block">
-            <Card className="glass-card rounded-2xl border-0 hover-lift cursor-pointer group">
-              <CardContent className="py-5 px-5 flex items-center gap-3">
-                <div className="p-2.5 rounded-xl bg-foreground/5 group-hover:bg-foreground group-hover:text-background transition-colors">
-                  <FileText className="h-4 w-4" />
-                </div>
-                <div>
-                  <p className="text-sm font-semibold">Update Profile</p>
-                  <p className="text-xs text-muted-foreground">Improve AI matches</p>
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
         </div>
       </div>
     </DashboardLayout>

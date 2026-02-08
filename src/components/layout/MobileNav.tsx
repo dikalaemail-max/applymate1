@@ -1,7 +1,8 @@
 import { Link, useLocation } from "react-router-dom";
-import { LayoutDashboard, FolderOpen, Share2, MessageCircle, Settings, Menu, X, Rocket, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, FolderOpen, Share2, MessageCircle, Settings, Menu, X, Users, LogOut } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { cn } from "@/lib/utils";
+import { ApplyMateLogo } from "@/components/ApplyMateLogo";
 import { useState } from "react";
 
 const navItems = [
@@ -21,9 +22,7 @@ export function MobileNav() {
     <>
       <header className="md:hidden flex items-center justify-between px-4 py-3 bg-sidebar text-sidebar-foreground border-b border-sidebar-border">
         <div className="flex items-center gap-2.5">
-          <div className="gradient-primary p-1.5 rounded-lg">
-            <Rocket className="h-4 w-4 text-white" />
-          </div>
+          <ApplyMateLogo size="sm" className="text-sidebar-foreground" />
           <span className="text-lg font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>ApplyMate</span>
         </div>
         <button onClick={() => setOpen(!open)} className="p-1 rounded-lg hover:bg-sidebar-accent/50 transition-colors">

@@ -14,6 +14,36 @@ export type Database = {
   }
   public: {
     Tables: {
+      ai_results_cache: {
+        Row: {
+          created_at: string
+          id: string
+          result_data: Json
+          result_type: string
+          scholarship_id: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          result_data?: Json
+          result_type: string
+          scholarship_id?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          result_data?: Json
+          result_type?: string
+          scholarship_id?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       application_checklist: {
         Row: {
           created_at: string | null

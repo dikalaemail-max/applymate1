@@ -4,7 +4,6 @@ import { DashboardLayout } from "@/components/layout/DashboardLayout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { Plus, FolderOpen, Clock, Send, Trophy, TrendingUp, FileText, Target, ArrowRight } from "lucide-react";
@@ -47,61 +46,60 @@ export default function Dashboard() {
   const recentlyAdded = active
     .filter((s) => new Date(s.created_at) >= subDays(new Date(), 7))
     .length;
-
   const completionRate = total > 0 ? Math.round(((submitted + awarded) / total) * 100) : 0;
 
   const stats = [
-    { label: "Total Applications", value: total, icon: FolderOpen, gradient: "from-violet-500 to-purple-600" },
-    { label: "Upcoming Deadlines", value: upcoming.length, icon: Clock, gradient: "from-amber-400 to-orange-500" },
-    { label: "Submitted", value: submitted, icon: Send, gradient: "from-blue-400 to-indigo-500" },
-    { label: "Awarded", value: awarded, icon: Trophy, gradient: "from-emerald-400 to-green-500" },
+    { label: "Total", value: total, icon: FolderOpen },
+    { label: "Upcoming", value: upcoming.length, icon: Clock },
+    { label: "Submitted", value: submitted, icon: Send },
+    { label: "Awarded", value: awarded, icon: Trophy },
   ];
 
   const getUrgencyColor = (deadline: string) => {
     const days = differenceInDays(new Date(deadline), new Date());
     if (days < 0) return "bg-destructive/10 text-destructive";
     if (days <= 3) return "bg-destructive/10 text-destructive";
-    if (days <= 7) return "bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400";
-    return "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400";
+    if (days <= 7) return "bg-warning/10 text-warning";
+    return "bg-success/10 text-success";
   };
 
   const statusBreakdown = [
-    { label: "Saved", count: active.filter((s) => s.status === "saved").length, color: "bg-secondary" },
-    { label: "In Progress", count: inProgress, color: "bg-blue-500" },
-    { label: "Submitted", count: submitted, color: "bg-purple-500" },
-    { label: "Awarded", count: awarded, color: "bg-emerald-500" },
+    { label: "Saved", count: active.filter((s) => s.status === "saved").length, color: "bg-muted-foreground" },
+    { label: "In Progress", count: inProgress, color: "bg-foreground" },
+    { label: "Submitted", count: submitted, color: "bg-foreground/60" },
+    { label: "Awarded", count: awarded, color: "bg-success" },
     { label: "Rejected", count: rejected, color: "bg-destructive" },
   ];
 
   return (
     <DashboardLayout>
-      <div className="space-y-8 max-w-6xl mx-auto w-full min-w-0">
+      <div className="space-y-6 max-w-6xl mx-auto w-full min-w-0">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 animate-fade-up" style={{ animationDelay: '0ms' }}>
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Dashboard</h1>
-            <p className="text-muted-foreground mt-1 text-sm">Your application overview</p>
+            <p className="text-muted-foreground mt-0.5 text-sm">Your application overview</p>
           </div>
           <Link to="/scholarships/new">
-            <Button className="gradient-primary border-0 text-white shadow-lg shadow-primary/20 hover:shadow-primary/30 hover:brightness-110 transition-all rounded-xl h-10 px-5 w-full sm:w-auto">
+            <Button className="bg-foreground text-background hover:bg-foreground/90 rounded-xl h-10 px-5 w-full sm:w-auto shadow-lg shadow-foreground/5">
               <Plus className="h-4 w-4 mr-2" />
               Add Application
             </Button>
           </Link>
         </div>
 
-        {/* Stats Grid */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {stats.map((stat, i) => (
-            <Card key={stat.label} className="hover-lift glass-card rounded-2xl border-0 overflow-hidden animate-fade-up" style={{ animationDelay: `${(i + 1) * 80}ms`, opacity: 0 }}>
+        {/* Stats */}
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {stats.map((stat) => (
+            <Card key={stat.label} className="glass-card rounded-2xl border-0 hover-lift">
               <CardContent className="pt-5 pb-4 px-5">
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-3xl font-bold tracking-tight">{loading ? "–" : stat.value}</p>
+                    <p className="text-3xl font-bold tracking-tight tabular-nums">{loading ? "–" : stat.value}</p>
                     <p className="text-xs text-muted-foreground mt-1 font-medium">{stat.label}</p>
                   </div>
-                  <div className={`bg-gradient-to-br ${stat.gradient} p-2.5 rounded-xl shadow-sm`}>
-                    <stat.icon className="h-4 w-4 text-white" />
+                  <div className="p-2.5 rounded-xl bg-foreground/5">
+                    <stat.icon className="h-4 w-4 text-foreground/60" />
                   </div>
                 </div>
               </CardContent>
@@ -110,37 +108,35 @@ export default function Dashboard() {
         </div>
 
         {/* AI Advisor */}
-        <div className="animate-fade-up" style={{ animationDelay: '400ms', opacity: 0 }}>
-          <AdvisorCard scholarships={scholarships} loading={loading} />
-        </div>
+        <AdvisorCard scholarships={scholarships} loading={loading} />
 
-        {/* Middle Row: Progress + Quick Stats */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
-          <Card className="glass-card rounded-2xl border-0 animate-fade-up" style={{ animationDelay: '480ms', opacity: 0 }}>
+        {/* Middle Row */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <Card className="glass-card rounded-2xl border-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <div className="bg-gradient-to-br from-violet-500 to-purple-600 p-1.5 rounded-lg">
-                  <Target className="h-3.5 w-3.5 text-white" />
+                <div className="p-1.5 rounded-lg bg-foreground/5">
+                  <Target className="h-3.5 w-3.5" />
                 </div>
                 Completion Rate
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
               <div className="flex items-end gap-2">
-                <span className="text-4xl font-bold tracking-tight">{loading ? "–" : `${completionRate}%`}</span>
+                <span className="text-4xl font-bold tracking-tight tabular-nums">{loading ? "–" : `${completionRate}%`}</span>
                 <span className="text-xs text-muted-foreground pb-1.5">submitted or awarded</span>
               </div>
               <div className="h-2 rounded-full bg-muted overflow-hidden">
-                <div className="h-full rounded-full gradient-primary transition-all duration-700" style={{ width: loading ? '0%' : `${completionRate}%` }} />
+                <div className="h-full rounded-full bg-foreground transition-all duration-700" style={{ width: loading ? '0%' : `${completionRate}%` }} />
               </div>
             </CardContent>
           </Card>
 
-          <Card className="glass-card rounded-2xl border-0 animate-fade-up" style={{ animationDelay: '560ms', opacity: 0 }}>
+          <Card className="glass-card rounded-2xl border-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <div className="bg-gradient-to-br from-blue-400 to-indigo-500 p-1.5 rounded-lg">
-                  <TrendingUp className="h-3.5 w-3.5 text-white" />
+                <div className="p-1.5 rounded-lg bg-foreground/5">
+                  <TrendingUp className="h-3.5 w-3.5" />
                 </div>
                 Quick Stats
               </CardTitle>
@@ -149,9 +145,7 @@ export default function Dashboard() {
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Total Won</span>
-                  <span className="font-bold text-emerald-600 dark:text-emerald-400">
-                    {loading ? "–" : `$${totalAmount.toLocaleString()}`}
-                  </span>
+                  <span className="font-bold text-success">{loading ? "–" : `$${totalAmount.toLocaleString()}`}</span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm text-muted-foreground">Added This Week</span>
@@ -165,11 +159,11 @@ export default function Dashboard() {
             </CardContent>
           </Card>
 
-          <Card className="glass-card rounded-2xl border-0 animate-fade-up" style={{ animationDelay: '640ms', opacity: 0 }}>
+          <Card className="glass-card rounded-2xl border-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <div className="bg-gradient-to-br from-amber-400 to-orange-500 p-1.5 rounded-lg">
-                  <FileText className="h-3.5 w-3.5 text-white" />
+                <div className="p-1.5 rounded-lg bg-foreground/5">
+                  <FileText className="h-3.5 w-3.5" />
                 </div>
                 Status Breakdown
               </CardTitle>
@@ -189,12 +183,12 @@ export default function Dashboard() {
         </div>
 
         {/* Upcoming Deadlines */}
-        <Card className="glass-card rounded-2xl border-0 animate-fade-up" style={{ animationDelay: '720ms', opacity: 0 }}>
+        <Card className="glass-card rounded-2xl border-0">
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base">Upcoming Deadlines</CardTitle>
               {upcoming.length > 0 && (
-                <Link to="/scholarships" className="text-xs text-primary font-semibold hover:underline flex items-center gap-1">
+                <Link to="/scholarships" className="text-xs font-semibold hover:underline flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors">
                   View all <ArrowRight className="h-3 w-3" />
                 </Link>
               )}
@@ -213,7 +207,7 @@ export default function Dashboard() {
                 </Link>
               </div>
             ) : (
-              <div className="space-y-2">
+              <div className="space-y-1">
                 {upcoming.slice(0, 8).map((s) => {
                   const days = differenceInDays(new Date(s.deadline!), new Date());
                   return (
@@ -223,14 +217,14 @@ export default function Dashboard() {
                       className="flex items-center justify-between p-3 rounded-xl hover:bg-accent/50 transition-all duration-200 group"
                     >
                       <div className="min-w-0">
-                        <p className="font-medium truncate group-hover:text-primary transition-colors">{s.name}</p>
+                        <p className="font-medium truncate group-hover:text-foreground transition-colors">{s.name}</p>
                         <p className="text-xs text-muted-foreground">{s.organization}</p>
                       </div>
                       <div className="flex items-center gap-2 shrink-0">
                         {s.amount && (
-                          <span className="text-sm font-bold">${Number(s.amount).toLocaleString()}</span>
+                          <span className="text-sm font-bold tabular-nums">${Number(s.amount).toLocaleString()}</span>
                         )}
-                        <Badge className={`${getUrgencyColor(s.deadline!)} font-semibold text-xs`}>
+                        <Badge className={`${getUrgencyColor(s.deadline!)} font-semibold text-xs border-0`}>
                           {days === 0 ? "Today" : days === 1 ? "Tomorrow" : `${days}d left`}
                         </Badge>
                       </div>

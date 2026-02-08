@@ -21,14 +21,13 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false);
   const [profileData, setProfileData] = useState<any>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
-
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [changingPassword, setChangingPassword] = useState(false);
 
   const fetchProfile = async () => {
     if (!user) return;
-    const { data } = await supabase.from("profiles").select("*").eq("user_id", user.id).single();
+    const { data } = await supabase.from("profiles").select("*").eq("user_id", user.id).maybeSingle();
     if (data) {
       setDisplayName(data.display_name || "");
       setAvatarUrl(data.avatar_url || "");
@@ -85,17 +84,18 @@ export default function SettingsPage() {
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Settings</h1>
 
         <Tabs defaultValue="profile">
-          <TabsList className="w-full sm:w-auto flex overflow-x-auto">
-            <TabsTrigger value="profile" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none"><User className="h-4 w-4" /> Account</TabsTrigger>
-            <TabsTrigger value="cv" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none"><FileText className="h-4 w-4" /> Profile & CV</TabsTrigger>
-            <TabsTrigger value="security" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none"><Lock className="h-4 w-4" /> Security</TabsTrigger>
+          <TabsList className="w-full sm:w-auto flex overflow-x-auto rounded-xl bg-muted/50 p-1">
+            <TabsTrigger value="profile" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none rounded-lg"><User className="h-4 w-4" /> Account</TabsTrigger>
+            <TabsTrigger value="cv" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none rounded-lg"><FileText className="h-4 w-4" /> Profile & CV</TabsTrigger>
+            <TabsTrigger value="security" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none rounded-lg"><Lock className="h-4 w-4" /> Security</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="mt-4 space-y-6">
-            <Card>
+            <Card className="glass-card rounded-2xl border-0">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <User className="h-5 w-5" /> Account
+                  <div className="p-1.5 rounded-lg bg-foreground/5"><User className="h-4 w-4" /></div>
+                  Account
                 </CardTitle>
                 <CardDescription>Your basic account information</CardDescription>
               </CardHeader>
@@ -105,7 +105,7 @@ export default function SettingsPage() {
                     {avatarUrl ? (
                       <img src={avatarUrl} alt="Avatar" className="h-full w-full object-cover rounded-full" />
                     ) : (
-                      <AvatarFallback className="text-lg font-bold bg-primary/10 text-primary">{initials}</AvatarFallback>
+                      <AvatarFallback className="text-lg font-bold bg-foreground/5">{initials}</AvatarFallback>
                     )}
                   </Avatar>
                   <div className="flex-1">
@@ -117,18 +117,18 @@ export default function SettingsPage() {
                 <div className="grid gap-4">
                   <div className="space-y-2">
                     <Label>Email</Label>
-                    <Input value={user?.email || ""} disabled />
+                    <Input value={user?.email || ""} disabled className="rounded-xl" />
                   </div>
                   <div className="space-y-2">
                     <Label>Display Name</Label>
-                    <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" />
+                    <Input value={displayName} onChange={(e) => setDisplayName(e.target.value)} placeholder="Your name" className="rounded-xl" />
                   </div>
                   <div className="space-y-2">
                     <Label>Avatar URL</Label>
-                    <Input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://example.com/avatar.jpg" />
+                    <Input value={avatarUrl} onChange={(e) => setAvatarUrl(e.target.value)} placeholder="https://example.com/avatar.jpg" className="rounded-xl" />
                   </div>
                 </div>
-                <Button onClick={handleSaveProfile} disabled={saving}>
+                <Button onClick={handleSaveProfile} disabled={saving} className="rounded-xl bg-foreground text-background hover:bg-foreground/90">
                   {saving ? "Saving..." : "Save"}
                 </Button>
               </CardContent>
@@ -138,7 +138,7 @@ export default function SettingsPage() {
           <TabsContent value="cv" className="mt-4">
             {loadingProfile ? (
               <div className="flex justify-center py-12">
-                <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
               </div>
             ) : (
               <ProfileEditor initialData={profileData || {}} onSaved={fetchProfile} />
@@ -146,33 +146,34 @@ export default function SettingsPage() {
           </TabsContent>
 
           <TabsContent value="security" className="mt-4 space-y-6">
-            <Card>
+            <Card className="glass-card rounded-2xl border-0">
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Lock className="h-5 w-5" /> Change Password
+                  <div className="p-1.5 rounded-lg bg-foreground/5"><Lock className="h-4 w-4" /></div>
+                  Change Password
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2">
                   <Label>New Password</Label>
-                  <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" />
+                  <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" className="rounded-xl" />
                 </div>
                 <div className="space-y-2">
                   <Label>Confirm New Password</Label>
-                  <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" />
+                  <Input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="••••••••" className="rounded-xl" />
                 </div>
-                <Button onClick={handleChangePassword} disabled={changingPassword} variant="outline">
+                <Button onClick={handleChangePassword} disabled={changingPassword} variant="outline" className="rounded-xl">
                   {changingPassword ? "Updating..." : "Update Password"}
                 </Button>
               </CardContent>
             </Card>
 
-            <Card className="border-destructive/30">
+            <Card className="border-destructive/20 rounded-2xl">
               <CardHeader>
                 <CardTitle className="text-lg text-destructive">Danger Zone</CardTitle>
               </CardHeader>
               <CardContent>
-                <Button variant="destructive" onClick={signOut}>Sign Out of All Devices</Button>
+                <Button variant="destructive" onClick={signOut} className="rounded-xl">Sign Out of All Devices</Button>
               </CardContent>
             </Card>
           </TabsContent>

@@ -13,6 +13,10 @@ import {
 } from "lucide-react";
 import { format, differenceInDays, isPast, subDays, isThisWeek } from "date-fns";
 import { AdvisorCard } from "@/components/AdvisorCard";
+import { ActivityTimeline } from "@/components/ActivityTimeline";
+import { DeadlineCalendar } from "@/components/DeadlineCalendar";
+import { QuickNotes } from "@/components/QuickNotes";
+import { InsightsChart } from "@/components/InsightsChart";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Scholarship = Tables<"scholarships">;
@@ -142,6 +146,14 @@ export default function Dashboard() {
 
         {/* AI Advisor */}
         <AdvisorCard scholarships={scholarships} loading={loading} />
+
+        {/* Insights + Calendar Row */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <InsightsChart scholarships={scholarships} loading={loading} />
+          <DeadlineCalendar
+            deadlines={upcoming.map((s) => ({ id: s.id, name: s.name, deadline: s.deadline! }))}
+          />
+        </div>
 
         {/* Financial + Progress Row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -377,6 +389,12 @@ export default function Dashboard() {
             )}
           </CardContent>
         </Card>
+
+        {/* Activity Timeline + Quick Notes */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <ActivityTimeline />
+          <QuickNotes />
+        </div>
 
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">

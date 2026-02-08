@@ -29,7 +29,7 @@ export function AppSidebar() {
   const { isAdmin, signOut, user } = useAuth();
 
   return (
-    <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border relative overflow-hidden">
+    <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border relative overflow-hidden h-screen sticky top-0">
       {/* Subtle glow at top */}
       <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 rounded-full bg-[hsl(var(--sidebar-primary))] opacity-[0.07] blur-3xl pointer-events-none" />
 

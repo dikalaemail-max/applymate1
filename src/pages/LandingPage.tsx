@@ -32,7 +32,7 @@ export default function LandingPage() {
       .from("community_posts")
       .select("id, user_email, content, created_at")
       .order("created_at", { ascending: false })
-      .limit(6)
+      .limit(5)
       .then(({ data }) => setPosts(data || []));
   }, []);
 

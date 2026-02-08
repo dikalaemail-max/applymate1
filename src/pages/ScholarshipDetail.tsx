@@ -16,6 +16,7 @@ import { format } from "date-fns";
 import { EssayAssistant } from "@/components/EssayAssistant";
 import { SuccessMeter } from "@/components/SuccessMeter";
 import { ApplicationChecklist } from "@/components/ApplicationChecklist";
+import { NotesSummary } from "@/components/NotesSummary";
 import type { Tables, Database } from "@/integrations/supabase/types";
 
 type Scholarship = Tables<"scholarships">;
@@ -286,6 +287,7 @@ export default function ScholarshipDetail() {
           </CardContent>
         </Card>
 
+        <NotesSummary scholarship={scholarship} />
         <SuccessMeter scholarship={scholarship} />
         <ApplicationChecklist scholarship={scholarship} />
         <EssayAssistant scholarship={scholarship} />

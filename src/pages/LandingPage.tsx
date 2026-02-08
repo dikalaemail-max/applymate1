@@ -1,7 +1,8 @@
 import { Link } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
-import { Rocket, ArrowRight, ArrowUpRight, Zap, Brain, Users } from "lucide-react";
+import { ArrowRight, ArrowUpRight, Zap, Brain, Users } from "lucide-react";
+import { ApplyMateLogo } from "@/components/ApplyMateLogo";
 import { motion, useScroll, useTransform } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
@@ -39,7 +40,7 @@ export default function LandingPage() {
       <nav className="fixed top-0 left-0 right-0 z-50 bg-background/60 backdrop-blur-2xl border-b border-border/30">
         <div className="max-w-7xl mx-auto flex items-center justify-between px-5 sm:px-8 h-14">
           <div className="flex items-center gap-2">
-            <Rocket className="h-4 w-4" />
+            <ApplyMateLogo size="sm" />
             <span className="text-sm font-bold tracking-tight uppercase">ApplyMate</span>
           </div>
           <Link to="/auth">
@@ -220,7 +221,7 @@ export default function LandingPage() {
       <footer className="border-t border-border/50 py-6 px-5 sm:px-8">
         <div className="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-3">
           <div className="flex items-center gap-2">
-            <Rocket className="h-3.5 w-3.5" />
+            <ApplyMateLogo size="sm" className="h-3.5 w-3.5" />
             <span className="text-xs font-bold uppercase tracking-wider">ApplyMate</span>
           </div>
           <p className="text-[10px] text-muted-foreground tracking-wider">© {new Date().getFullYear()} ALL RIGHTS RESERVED</p>

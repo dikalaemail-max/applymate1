@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from "react";
 import { formatDistanceToNow } from "date-fns";
-import { X, Send, Trash2 } from "lucide-react";
+import { X, Send, Trash2, Sparkles, Loader2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
@@ -36,6 +36,7 @@ export function ThreadPanel({ postId, originalPost, onClose, onReplyCountChange 
   const [replies, setReplies] = useState<Reply[]>([]);
   const [newReply, setNewReply] = useState("");
   const [sending, setSending] = useState(false);
+  const [aiLoading, setAiLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   const fetchReplies = async () => {
@@ -89,6 +90,24 @@ export function ThreadPanel({ postId, originalPost, onClose, onReplyCountChange 
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       handleSend();
+    }
+  };
+
+  const handleAiSuggest = async () => {
+    setAiLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("ai-community-assist", {
+        body: {
+          postContent: originalPost.content,
+          existingReplies: replies.map((r) => r.content),
+        },
+      });
+      if (error) throw error;
+      if (data?.suggestion) setNewReply(data.suggestion);
+    } catch (e: any) {
+      toast.error(e.message || "AI suggestion failed");
+    } finally {
+      setAiLoading(false);
     }
   };
 
@@ -153,8 +172,19 @@ export function ThreadPanel({ postId, originalPost, onClose, onReplyCountChange 
         ))}
       </div>
 
-      {/* Reply input */}
-      <div className="px-4 py-3 border-t border-border shrink-0">
+      <div className="px-4 py-3 border-t border-border shrink-0 space-y-2">
+        <div className="flex justify-end">
+          <Button
+            size="sm"
+            variant="ghost"
+            className="gap-1.5 text-xs text-muted-foreground h-7"
+            onClick={handleAiSuggest}
+            disabled={aiLoading}
+          >
+            {aiLoading ? <Loader2 className="h-3 w-3 animate-spin" /> : <Sparkles className="h-3 w-3" />}
+            AI Suggest
+          </Button>
+        </div>
         <div className="flex gap-2">
           <Textarea
             placeholder="Reply..."

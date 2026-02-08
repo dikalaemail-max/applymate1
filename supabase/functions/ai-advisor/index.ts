@@ -10,7 +10,6 @@ serve(async (req) => {
   if (req.method === "OPTIONS") return new Response(null, { headers: corsHeaders });
 
   try {
-    // Auth check
     const authHeader = req.headers.get("authorization");
     if (!authHeader) {
       return new Response(JSON.stringify({ error: "Unauthorized" }), {
@@ -101,6 +100,59 @@ serve(async (req) => {
         ],
         tool_choice: { type: "function", function: { name: "suggest_tasks" } },
       };
+    } else if (mode === "prioritize") {
+      const appList = (applications || []).map((a: any) =>
+        `- ID: ${a.id} | "${a.name}" | Status: ${a.status} | Deadline: ${a.deadline || "none"} | Amount: ${a.amount ? "$" + a.amount : "N/A"}`
+      ).join("\n");
+
+      body = {
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          {
+            role: "system",
+            content: "You are ApplyMate's priority advisor. Given a list of scholarship applications, pick the ONE most important to work on right now based on deadline urgency, amount, and status. Return using the pick_focus tool.",
+          },
+          {
+            role: "user",
+            content: `Today: ${new Date().toISOString().split("T")[0]}\n\nMy applications:\n${appList}\n\nWhich one should I focus on and why?`,
+          },
+        ],
+        tools: [
+          {
+            type: "function",
+            function: {
+              name: "pick_focus",
+              description: "Pick the single most important application to focus on.",
+              parameters: {
+                type: "object",
+                properties: {
+                  id: { type: "string", description: "The application ID" },
+                  name: { type: "string", description: "The application name" },
+                  reason: { type: "string", description: "Brief reason (1-2 sentences) why this is the priority" },
+                },
+                required: ["id", "name", "reason"],
+                additionalProperties: false,
+              },
+            },
+          },
+        ],
+        tool_choice: { type: "function", function: { name: "pick_focus" } },
+      };
+    } else if (mode === "summarize") {
+      const ctx = scholarshipContext || {};
+      body = {
+        model: "google/gemini-3-flash-preview",
+        messages: [
+          {
+            role: "system",
+            content: "You are ApplyMate's notes summarizer. Condense the scholarship's notes, eligibility info, and details into a brief 3-5 sentence summary the student can quickly review before applying. Be clear and actionable.",
+          },
+          {
+            role: "user",
+            content: `Scholarship: ${ctx.name || "Unknown"}\nOrganization: ${ctx.organization || "N/A"}\nAmount: ${ctx.amount || "N/A"}\nDeadline: ${ctx.deadline || "N/A"}\nStatus: ${ctx.status || "N/A"}\nEligibility: ${ctx.eligibility_notes || "N/A"}\nNotes: ${ctx.notes || "N/A"}\n\nSummarize this for me:`,
+          },
+        ],
+      };
     } else {
       return new Response(JSON.stringify({ error: "Invalid mode" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -141,8 +193,7 @@ serve(async (req) => {
       return new Response(JSON.stringify({ advice }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
-    } else {
-      // checklist mode — extract tool call
+    } else if (mode === "checklist") {
       const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
       if (toolCall) {
         const args = JSON.parse(toolCall.function.arguments);
@@ -153,7 +204,27 @@ serve(async (req) => {
       return new Response(JSON.stringify({ tasks: [] }), {
         headers: { ...corsHeaders, "Content-Type": "application/json" },
       });
+    } else if (mode === "prioritize") {
+      const toolCall = data.choices?.[0]?.message?.tool_calls?.[0];
+      if (toolCall) {
+        const args = JSON.parse(toolCall.function.arguments);
+        return new Response(JSON.stringify({ focus: args }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      return new Response(JSON.stringify({ focus: null }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
+    } else if (mode === "summarize") {
+      const summary = data.choices?.[0]?.message?.content || "Unable to generate summary.";
+      return new Response(JSON.stringify({ summary }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
+
+    return new Response(JSON.stringify({ error: "Unknown mode" }), {
+      status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },
+    });
   } catch (e) {
     console.error("ai-advisor error:", e);
     return new Response(JSON.stringify({ error: e instanceof Error ? e.message : "Unknown error" }), {

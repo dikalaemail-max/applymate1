@@ -172,6 +172,7 @@ export type Database = {
       profiles: {
         Row: {
           achievements: string[] | null
+          activity_streak: number | null
           avatar_url: string | null
           bio: string | null
           created_at: string
@@ -183,7 +184,9 @@ export type Database = {
           gpa: string | null
           id: string
           interests: string[] | null
+          last_active_at: string | null
           major: string | null
+          monthly_goal: number | null
           quick_notes: string | null
           skills: string[] | null
           updated_at: string
@@ -191,6 +194,7 @@ export type Database = {
         }
         Insert: {
           achievements?: string[] | null
+          activity_streak?: number | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -202,7 +206,9 @@ export type Database = {
           gpa?: string | null
           id?: string
           interests?: string[] | null
+          last_active_at?: string | null
           major?: string | null
+          monthly_goal?: number | null
           quick_notes?: string | null
           skills?: string[] | null
           updated_at?: string
@@ -210,6 +216,7 @@ export type Database = {
         }
         Update: {
           achievements?: string[] | null
+          activity_streak?: number | null
           avatar_url?: string | null
           bio?: string | null
           created_at?: string
@@ -221,7 +228,9 @@ export type Database = {
           gpa?: string | null
           id?: string
           interests?: string[] | null
+          last_active_at?: string | null
           major?: string | null
+          monthly_goal?: number | null
           quick_notes?: string | null
           skills?: string[] | null
           updated_at?: string

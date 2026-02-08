@@ -5,7 +5,8 @@ import { useAuth } from "@/contexts/AuthContext";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Rocket, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
+import { ApplyMateLogo } from "@/components/ApplyMateLogo";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
 
@@ -134,9 +135,7 @@ export default function Auth() {
 
         <div className="relative z-10 w-full max-w-md space-y-8 animate-fade-up">
           <div className="flex flex-col items-center gap-3">
-            <div className="gradient-primary p-2.5 rounded-2xl shadow-lg">
-              <Rocket className="h-7 w-7 text-white" />
-            </div>
+             <ApplyMateLogo size="lg" />
             <h1 className="text-2xl font-bold tracking-tight gradient-text" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               Admin Verification
             </h1>
@@ -202,9 +201,7 @@ export default function Auth() {
         {/* Logo */}
         <div className="flex flex-col items-center gap-3">
           <div className="flex items-center gap-3">
-            <div className="gradient-primary p-2.5 rounded-2xl shadow-lg">
-              <Rocket className="h-7 w-7 text-white" />
-            </div>
+            <ApplyMateLogo size="lg" />
             <h1 className="text-4xl font-bold tracking-tight gradient-text" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
               ApplyMate
             </h1>

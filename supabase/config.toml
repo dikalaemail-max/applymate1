@@ -14,3 +14,9 @@ verify_jwt = false
 
 [functions.success-meter]
 verify_jwt = false
+
+[functions.ai-recommender]
+verify_jwt = false
+
+[functions.ai-community-assist]
+verify_jwt = false

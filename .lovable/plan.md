@@ -1,88 +1,147 @@
 
 
-# Power Up ApplyMate: Smart Features & Polish
+# ApplyMate: AI Expansion, Visual Overhaul, Logo Refresh, and New Features
 
-Here's a plan to add genuinely useful features that make the app feel more alive and data-driven.
-
----
-
-## 1. Activity Timeline / Recent Activity Feed
-
-Add a "Recent Activity" section to the Dashboard that shows a chronological feed of what the user has done -- applications added, statuses changed, files uploaded, checklist items completed. This gives users a sense of momentum and helps them pick up where they left off.
-
-- Track activity by querying recent scholarship updates (using `updated_at`), recent checklist completions, and recent community posts
-- Display as a compact timeline with icons and relative timestamps ("2h ago", "Yesterday")
-- Placed below the AI Advisor card on the Dashboard
+## Overview
+A major upgrade covering four areas: deeper AI integration across the app, a refined high-end black-and-white visual redesign, a new custom logo mark, and new dashboard quick-action buttons and features.
 
 ---
 
-## 2. Deadline Calendar View
+## 1. New AI Features
 
-Add a visual mini-calendar to the Dashboard that highlights days with upcoming deadlines. Users can see at a glance which days are busy.
+### A. AI Scholarship Recommender (Dashboard Widget)
+A new "Discover Scholarships" card on the dashboard. Based on the user's profile (education, major, GPA, skills), AI suggests scholarships the user should look for -- categories, types, and search strategies personalized to them.
+- New edge function: `ai-recommender`
+- New dashboard component: `ScholarshipRecommender.tsx`
+- Uses profile data to generate tailored suggestions
 
-- Use a lightweight month-view grid (built with the existing `date-fns` library, no new dependencies)
-- Days with deadlines get a dot indicator; clicking a day scrolls to or filters the deadline list
-- Placed alongside the Upcoming Deadlines card
+### B. AI Notes Summarizer (Scholarship Detail)
+On each scholarship detail page, a "Summarize Notes" button that uses AI to condense the user's notes, eligibility info, and checklist into a quick brief they can review before applying.
+- Reuses the existing `ai-advisor` edge function with a new `mode: "summarize"`
+- Appears as a collapsible summary card on ScholarshipDetail
 
----
+### C. AI Community Reply Suggestions
+When viewing a community thread, an "AI Suggest Reply" button that drafts a helpful response based on the post context.
+- New edge function: `ai-community-assist`
+- Small button in the ThreadPanel reply area
 
-## 3. Quick Notes / Scratch Pad
-
-A persistent, always-accessible notepad on the Dashboard for jotting down quick thoughts, links, or reminders that don't belong to a specific application.
-
-- Stored in the `profiles` table (add a `quick_notes` TEXT column)
-- Auto-saves on blur/debounce
-- Collapsible card on the Dashboard
-
----
-
-## 4. Application Insights Chart
-
-A simple visual chart showing application activity over time -- how many applications were added per week/month, and status distribution trends.
-
-- Use the already-installed `recharts` library
-- Bar chart showing applications added per month
-- Gives users a sense of their application pace
+### D. AI Deadline Priority Ranking (Dashboard)
+Instead of just listing upcoming deadlines chronologically, AI ranks them by urgency + success probability + amount, giving a smart "Focus Next" recommendation at the top of the dashboard.
+- Extends the `ai-advisor` edge function with `mode: "prioritize"`
+- New component: `FocusNext.tsx` -- a highlighted card showing the single most important application to work on right now
 
 ---
 
-## 5. Keyboard Shortcuts & Quick Actions
+## 2. Visual Overhaul (Black and White, Non-Ordinary)
 
-Add a command palette (Cmd+K / Ctrl+K) for power users to quickly navigate, search applications, or create new ones without clicking through menus.
+### A. Typography Refinement
+- Increase use of `Instrument Serif` italic for display headings and accent text
+- Add variable letter-spacing for a more editorial, magazine-like feel
+- Larger, bolder hero numbers on dashboard stat cards
 
-- Use the already-installed `cmdk` library
-- Actions: "New Application", "Go to Dashboard", "Go to Settings", search by app name
-- Accessible from any page within the dashboard layout
+### B. Card and Surface Redesign
+- Replace uniform `glass-card` with a mix of surface treatments:
+  - **Elevated cards**: Subtle outer shadow with micro-border for primary content
+  - **Inset cards**: Slightly recessed look (inner shadow) for secondary info
+  - **Borderless cards**: Clean flat areas for content-heavy sections
+- Add subtle noise texture overlay to cards for tactile depth
+- Rounded corners increased to `2xl` / `3xl` for a softer, premium feel
+
+### C. Sidebar Refinement
+- Add a thin animated gradient line (white-to-transparent) along the top of the sidebar
+- User avatar area gets a frosted glass treatment
+- Active nav item gets a subtle left-edge accent bar instead of background fill
+- Hover states become more fluid with scale micro-animations
+
+### D. Dashboard Layout
+- Asymmetric grid: hero stat row becomes a featured large card + 3 smaller cards instead of 4 equal cards
+- Add subtle divider lines between sections (thin, faded)
+- Section labels styled as small uppercase monospaced tags
+
+### E. Buttons and Interactions
+- Primary buttons get a subtle inner highlight (top edge lighter) for depth
+- Hover states use `scale(1.02)` + shadow elevation
+- Focus rings become offset double-rings for accessibility with style
+- Add micro-animations: cards fade-slide-up on scroll into view
+
+### F. Landing Page Polish
+- Parallax depth on hero section background grid
+- Smoother scroll-linked transforms
+- Feature cards get a staggered reveal with slight rotation
+
+---
+
+## 3. Logo Change
+
+Replace the Rocket icon with a custom SVG logo mark:
+- Concept: An abstract "A" letterform made of two converging lines meeting at a point (like a compass/arrow pointing up), representing ambition and direction
+- Monochrome: works in black on white and white on black
+- Used in: Sidebar, MobileNav, LandingPage nav, Auth page, favicon
+- The logo will be an inline SVG component (`ApplyMateLogo.tsx`) for crisp rendering at all sizes
+
+---
+
+## 4. New Dashboard Features and Quick Actions
+
+### A. Quick Action Buttons Row
+A new horizontal row below the greeting with one-tap actions:
+- **"Add Application"** (existing, restyled)
+- **"Scan URL"** -- opens a modal to paste a URL and auto-import a scholarship
+- **"AI Brief"** -- triggers the AI advisor for a quick status summary
+- **"Export CSV"** -- one-click export of all applications
+
+### B. Streak / Activity Counter
+A small widget showing the user's activity streak (consecutive days they've logged in or made changes), encouraging engagement.
+- Tracked via `profiles.last_active_at` (new column)
+- Visual: flame icon with day count
+
+### C. Goal Tracker
+A configurable goal card: "Apply to X scholarships this month" with a progress ring.
+- New column on profiles: `monthly_goal` (integer)
+- Shows progress toward the goal with visual ring
 
 ---
 
 ## Technical Details
 
-### Database Migration
-
-Add a `quick_notes` column to the profiles table:
-
-```sql
-ALTER TABLE public.profiles ADD COLUMN IF NOT EXISTS quick_notes TEXT DEFAULT '';
-```
-
-### Files to Create
-
+### New Files to Create
 | File | Purpose |
 |------|---------|
-| `src/components/ActivityTimeline.tsx` | Recent activity feed component |
-| `src/components/DeadlineCalendar.tsx` | Mini month-view calendar with deadline dots |
-| `src/components/QuickNotes.tsx` | Auto-saving scratch pad |
-| `src/components/InsightsChart.tsx` | Recharts bar chart for application trends |
-| `src/components/CommandPalette.tsx` | Cmd+K command palette using cmdk |
+| `src/components/ApplyMateLogo.tsx` | SVG logo component |
+| `src/components/ScholarshipRecommender.tsx` | AI recommendation widget |
+| `src/components/FocusNext.tsx` | AI-prioritized next action card |
+| `src/components/QuickActions.tsx` | Dashboard quick action buttons row |
+| `src/components/StreakCounter.tsx` | Activity streak widget |
+| `src/components/GoalTracker.tsx` | Monthly goal progress ring |
+| `src/components/NotesSummary.tsx` | AI notes summarizer for detail page |
+| `supabase/functions/ai-recommender/index.ts` | Scholarship recommendation edge function |
+| `supabase/functions/ai-community-assist/index.ts` | Community reply suggestion edge function |
 
 ### Files to Modify
+| File | Changes |
+|------|---------|
+| `src/index.css` | New utility classes, noise texture, card variants, animations |
+| `src/components/layout/AppSidebar.tsx` | New logo, nav styling, accent bar |
+| `src/components/layout/MobileNav.tsx` | New logo, updated styles |
+| `src/pages/Dashboard.tsx` | New layout grid, integrate new widgets |
+| `src/pages/LandingPage.tsx` | New logo, visual polish |
+| `src/pages/Auth.tsx` | New logo |
+| `src/pages/ScholarshipDetail.tsx` | Add NotesSummary component |
+| `src/components/community/ThreadPanel.tsx` | Add AI reply suggestion button |
+| `src/components/AdvisorCard.tsx` | Visual refresh |
+| `supabase/functions/ai-advisor/index.ts` | Add "prioritize" and "summarize" modes |
+| `supabase/config.toml` | Register new edge functions |
+| `index.html` | Update favicon reference |
+| `tailwind.config.ts` | New animation keyframes |
 
-| File | Change |
-|------|--------|
-| `src/pages/Dashboard.tsx` | Add ActivityTimeline, DeadlineCalendar, QuickNotes, and InsightsChart components |
-| `src/components/layout/DashboardLayout.tsx` | Mount CommandPalette globally |
+### Database Changes
+- `profiles` table: add `last_active_at` (timestamptz), `monthly_goal` (integer, default 5), `activity_streak` (integer, default 0)
 
-### No new dependencies needed
-Everything uses libraries already installed: `recharts`, `cmdk`, `date-fns`, `framer-motion`.
+### Edge Function Architecture
+All new AI functions follow the existing pattern:
+- CORS headers
+- Auth check via authorization header
+- Lovable AI Gateway call with `google/gemini-3-flash-preview`
+- Proper 429/402 error handling
+- Non-streaming (tool calling / JSON response) for structured outputs
 

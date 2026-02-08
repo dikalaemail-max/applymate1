@@ -54,7 +54,7 @@ export function MobileNav() {
           })}
           {isAdmin && (
             <Link
-              to="/admin/users"
+              to="/admin"
               onClick={() => setOpen(false)}
               className={cn(
                 "flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-medium transition-all",
@@ -62,7 +62,7 @@ export function MobileNav() {
               )}
             >
               <Users className="h-4 w-4" />
-              Admin: Users
+              Admin Panel
             </Link>
           )}
           <button

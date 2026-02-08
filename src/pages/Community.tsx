@@ -109,7 +109,7 @@ export default function Community() {
 
   return (
     <DashboardLayout>
-      <div className="flex h-[calc(100vh-2rem)] md:h-[calc(100vh-4rem)] gap-0 -m-4 md:-m-8">
+      <div className="flex h-[calc(100vh-2rem)] md:h-[calc(100vh-4rem)] gap-0 -m-4 md:-m-8 min-w-0">
         {/* Main feed */}
         <div className={`flex-1 flex flex-col min-w-0 ${activeThread ? "hidden md:flex" : "flex"}`}>
           <div className="px-4 md:px-6 pt-4 md:pt-6 pb-3 space-y-4 shrink-0">

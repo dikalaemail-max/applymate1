@@ -21,7 +21,7 @@ const navItems = [
 ];
 
 const adminItems = [
-  { icon: Users, label: "Admin: Users", href: "/admin/users" },
+  { icon: Users, label: "Admin Panel", href: "/admin" },
 ];
 
 export function AppSidebar() {

@@ -147,10 +147,10 @@ export default function ScholarshipDetail() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+      <div className="max-w-3xl mx-auto space-y-6 w-full min-w-0">
+        <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={() => navigate("/scholarships")} className="gap-2 w-fit">
+            <Button variant="ghost" onClick={() => navigate("/scholarships")} className="gap-2 w-fit" size="sm">
               <ArrowLeft className="h-4 w-4" /> Back
             </Button>
             <button

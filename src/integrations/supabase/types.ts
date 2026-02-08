@@ -184,6 +184,7 @@ export type Database = {
           id: string
           interests: string[] | null
           major: string | null
+          quick_notes: string | null
           skills: string[] | null
           updated_at: string
           user_id: string
@@ -202,6 +203,7 @@ export type Database = {
           id?: string
           interests?: string[] | null
           major?: string | null
+          quick_notes?: string | null
           skills?: string[] | null
           updated_at?: string
           user_id: string
@@ -220,6 +222,7 @@ export type Database = {
           id?: string
           interests?: string[] | null
           major?: string | null
+          quick_notes?: string | null
           skills?: string[] | null
           updated_at?: string
           user_id?: string

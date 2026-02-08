@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { AppSidebar } from "./AppSidebar";
 import { MobileNav } from "./MobileNav";
+import { CommandPalette } from "@/components/CommandPalette";
 
 export function DashboardLayout({ children }: { children: ReactNode }) {
   return (
@@ -12,6 +13,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         <MobileNav />
         <main className="relative flex-1 p-4 md:p-8 overflow-x-hidden overflow-y-auto">{children}</main>
       </div>
+      <CommandPalette />
     </div>
   );
 }

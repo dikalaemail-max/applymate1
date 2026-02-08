@@ -22,6 +22,52 @@ import type { Tables, Database } from "@/integrations/supabase/types";
 type Profile = Tables<"profiles">;
 type Scholarship = Tables<"scholarships">;
 type ScholarshipStatus = Database["public"]["Enums"]["scholarship_status"];
+type Reply = Tables<"community_replies">;
+
+function PostReplies({ postId }: { postId: string }) {
+  const [replies, setReplies] = useState<Reply[]>([]);
+  const [open, setOpen] = useState(false);
+  const { toast } = useToast();
+
+  const fetchReplies = async () => {
+    const { data } = await supabase.from("community_replies").select("*").eq("post_id", postId).order("created_at", { ascending: true });
+    setReplies(data || []);
+  };
+
+  useEffect(() => { if (open) fetchReplies(); }, [open]);
+
+  const deleteReply = async (id: string) => {
+    await supabase.from("community_replies").delete().eq("id", id);
+    toast({ title: "Reply deleted" });
+    fetchReplies();
+  };
+
+  return (
+    <div className="mt-2">
+      <button onClick={() => setOpen(!open)} className="text-xs text-primary hover:underline flex items-center gap-1">
+        <MessageCircle className="h-3 w-3" />
+        {open ? "Hide replies" : "Show replies"}
+      </button>
+      {open && (
+        <div className="mt-2 space-y-1.5 pl-3 border-l-2 border-border">
+          {replies.length === 0 && <p className="text-xs text-muted-foreground">No replies</p>}
+          {replies.map((r) => (
+            <div key={r.id} className="flex items-start justify-between gap-2 text-xs">
+              <div className="min-w-0 flex-1">
+                <span className="font-semibold">{r.user_email}</span>{" "}
+                <span className="text-muted-foreground">{format(new Date(r.created_at), "MMM d, HH:mm")}</span>
+                <p className="text-sm mt-0.5">{r.content}</p>
+              </div>
+              <Button variant="ghost" size="icon" className="h-6 w-6 text-destructive shrink-0" onClick={() => deleteReply(r.id)}>
+                <Trash2 className="h-3 w-3" />
+              </Button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  );
+}
 
 const statusLabels: Record<string, string> = {
   saved: "Saved", in_progress: "In Progress", submitted: "Submitted",
@@ -127,6 +173,8 @@ export default function AdminDashboard() {
   };
 
   const deletePost = async (id: string) => {
+    // Delete replies first, then the post
+    await supabase.from("community_replies").delete().eq("post_id", id);
     await supabase.from("community_posts").delete().eq("id", id);
     toast({ title: "Post deleted" });
     fetchAll();
@@ -134,6 +182,7 @@ export default function AdminDashboard() {
 
   if (authLoading) return null;
   if (!isAdmin) return <Navigate to="/dashboard" replace />;
+
 
   const totalUsers = users.length;
   const totalApps = allScholarships.length;
@@ -374,6 +423,8 @@ export default function AdminDashboard() {
                             <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         </div>
+                        {/* Replies for this post */}
+                        <PostReplies postId={post.id} />
                       </CardContent>
                     </Card>
                   ))
@@ -476,6 +527,11 @@ export default function AdminDashboard() {
                 </DialogHeader>
                 {selectedScholarship && (
                   <div className="space-y-3 text-sm">
+                    {/* Owner */}
+                    <div>
+                      <p className="text-muted-foreground text-xs">Owner</p>
+                      <p className="font-medium">{users.find(u => u.user_id === selectedScholarship.user_id)?.display_name || selectedScholarship.user_id}</p>
+                    </div>
                     <div className="grid grid-cols-2 gap-3">
                       <div>
                         <p className="text-muted-foreground text-xs">Organization</p>

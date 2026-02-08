@@ -446,6 +446,15 @@ export type Database = {
       }
     }
     Functions: {
+      get_recent_public_posts: {
+        Args: never
+        Returns: {
+          content: string
+          created_at: string
+          display_name: string
+          id: string
+        }[]
+      }
       get_shared_scholarship: {
         Args: { _token: string }
         Returns: {

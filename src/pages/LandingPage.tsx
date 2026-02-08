@@ -16,7 +16,7 @@ const fadeUp = {
 
 interface PublicPost {
   id: string;
-  user_email: string;
+  display_name: string;
   content: string;
   created_at: string;
 }
@@ -29,11 +29,8 @@ export default function LandingPage() {
 
   useEffect(() => {
     supabase
-      .from("community_posts")
-      .select("id, user_email, content, created_at")
-      .order("created_at", { ascending: false })
-      .limit(5)
-      .then(({ data }) => setPosts(data || []));
+      .rpc("get_recent_public_posts")
+      .then(({ data }) => setPosts((data as PublicPost[]) || []));
   }, []);
 
   return (
@@ -175,11 +172,11 @@ export default function LandingPage() {
                   className="rounded-2xl border border-border/50 bg-card/50 p-6 hover:bg-card hover:shadow-lg hover:shadow-foreground/[0.03] transition-all duration-500 group"
                 >
                   <div className="flex items-center gap-2.5 mb-4">
-                    <div className="h-7 w-7 rounded-full bg-foreground text-background flex items-center justify-center text-[10px] font-bold">
-                      {post.user_email[0]?.toUpperCase()}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-xs font-semibold block truncate">{post.user_email.split("@")[0]}</span>
+                     <div className="h-7 w-7 rounded-full bg-foreground text-background flex items-center justify-center text-[10px] font-bold">
+                       {post.display_name[0]?.toUpperCase()}
+                     </div>
+                     <div className="flex-1 min-w-0">
+                       <span className="text-xs font-semibold block truncate">{post.display_name}</span>
                       <span className="text-[10px] text-muted-foreground">
                         {formatDistanceToNow(new Date(post.created_at), { addSuffix: true })}
                       </span>

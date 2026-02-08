@@ -205,7 +205,7 @@ export default function AdminDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6 max-w-full">
+      <div className="space-y-6 max-w-full min-w-0 overflow-hidden">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold tracking-tight flex items-center gap-2">
             <Shield className="h-6 w-6 text-primary" />
@@ -434,7 +434,7 @@ export default function AdminDashboard() {
 
             {/* User Detail Dialog */}
             <Dialog open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
-              <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+               <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
                   <DialogTitle className="flex items-center gap-2">
                     <div className="h-8 w-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-bold text-primary">
@@ -521,9 +521,9 @@ export default function AdminDashboard() {
 
             {/* Scholarship Detail Dialog */}
             <Dialog open={!!selectedScholarship} onOpenChange={(open) => !open && setSelectedScholarship(null)}>
-              <DialogContent className="max-w-lg max-h-[80vh] overflow-y-auto">
+               <DialogContent className="max-w-[calc(100vw-2rem)] sm:max-w-lg max-h-[80vh] overflow-y-auto">
                 <DialogHeader>
-                  <DialogTitle>{selectedScholarship?.name}</DialogTitle>
+                  <DialogTitle className="break-words">{selectedScholarship?.name}</DialogTitle>
                 </DialogHeader>
                 {selectedScholarship && (
                   <div className="space-y-3 text-sm">

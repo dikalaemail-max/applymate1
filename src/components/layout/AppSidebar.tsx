@@ -43,7 +43,7 @@ export function AppSidebar() {
       </div>
 
       <nav className="relative flex-1 px-3 py-4 space-y-1">
-        {navItems.map((item) => {
+        {!isAdmin && navItems.map((item) => {
           const active = pathname === item.href || pathname.startsWith(item.href + "/");
           return (
             <Link
@@ -67,7 +67,7 @@ export function AppSidebar() {
 
         {isAdmin && (
           <>
-            <div className="pt-4 pb-1 px-3">
+            <div className="pb-1 px-3">
               <span className="text-[10px] font-bold uppercase tracking-[0.15em] text-sidebar-foreground/30">
                 Admin
               </span>

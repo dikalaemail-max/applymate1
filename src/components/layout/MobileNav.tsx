@@ -33,7 +33,7 @@ export function MobileNav() {
 
       {open && (
         <div className="md:hidden fixed inset-0 top-[57px] z-50 bg-sidebar text-sidebar-foreground p-4 space-y-1 animate-fade-in">
-          {navItems.map((item) => {
+          {!isAdmin && navItems.map((item) => {
             const active = pathname.startsWith(item.href);
             return (
               <Link

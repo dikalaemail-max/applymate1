@@ -7,7 +7,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-background">
       <AppSidebar />
-      <div className="flex-1 flex flex-col relative">
+      <div className="flex-1 flex flex-col relative min-w-0">
         {/* Subtle mesh gradient overlay on main content */}
         <div className="absolute inset-0 mesh-gradient pointer-events-none opacity-50" />
         <MobileNav />

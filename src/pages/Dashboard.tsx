@@ -258,7 +258,7 @@ export default function Dashboard() {
                       <div key={i} className={`${seg.color} transition-all duration-500`} style={{ width: `${(seg.count / total) * 100}%` }} />
                     ))}
                   </div>
-                  <div className="grid grid-cols-5 gap-2">
+                  <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
                     {[
                       { label: "Saved", count: saved },
                       { label: "In Progress", count: inProgress },
@@ -348,19 +348,19 @@ export default function Dashboard() {
               <div className="space-y-1">
                 {/* Overdue first */}
                 {overdue.map((s) => (
-                  <Link
-                    key={s.id}
-                    to={`/scholarships/${s.id}`}
-                    className="flex items-center justify-between p-3 rounded-xl bg-destructive/5 hover:bg-destructive/10 transition-all duration-200 group"
-                  >
-                    <div className="min-w-0">
-                      <p className="font-medium truncate">{s.name}</p>
-                      <p className="text-xs text-muted-foreground">{s.organization}</p>
-                    </div>
-                    <Badge className="bg-destructive/10 text-destructive font-semibold text-xs border-0">
-                      Overdue
-                    </Badge>
-                  </Link>
+                   <Link
+                     key={s.id}
+                     to={`/scholarships/${s.id}`}
+                     className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl bg-destructive/5 hover:bg-destructive/10 transition-all duration-200 group gap-1 sm:gap-2"
+                   >
+                     <div className="min-w-0 flex-1">
+                       <p className="font-medium truncate">{s.name}</p>
+                       <p className="text-xs text-muted-foreground">{s.organization}</p>
+                     </div>
+                     <Badge className="bg-destructive/10 text-destructive font-semibold text-xs border-0 self-start sm:self-auto">
+                       Overdue
+                     </Badge>
+                   </Link>
                 ))}
                 {upcoming.slice(0, 8).map((s) => {
                   const days = differenceInDays(new Date(s.deadline!), new Date());
@@ -368,9 +368,9 @@ export default function Dashboard() {
                     <Link
                       key={s.id}
                       to={`/scholarships/${s.id}`}
-                      className="flex items-center justify-between p-3 rounded-xl hover:bg-accent/50 transition-all duration-200 group"
+                      className="flex flex-col sm:flex-row sm:items-center justify-between p-3 rounded-xl hover:bg-accent/50 transition-all duration-200 group gap-1 sm:gap-2"
                     >
-                      <div className="min-w-0">
+                      <div className="min-w-0 flex-1">
                         <p className="font-medium truncate group-hover:text-foreground transition-colors">{s.name}</p>
                         <p className="text-xs text-muted-foreground">{s.organization}</p>
                       </div>

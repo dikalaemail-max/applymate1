@@ -259,7 +259,7 @@ export default function Scholarships() {
               </div>
             </div>
           ) : (
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 w-full min-w-0">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 w-full min-w-0 overflow-hidden">
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
                   <button onClick={(e) => toggleFavorite(s.id, e)} className="shrink-0">
@@ -278,7 +278,7 @@ export default function Scholarships() {
                   </div>
                 )}
               </div>
-              <div className="flex items-center gap-2 shrink-0 ml-6 sm:ml-0">
+              <div className="flex items-center gap-2 shrink-0 ml-6 sm:ml-0 flex-wrap">
                 {s.amount && <span className="text-sm font-semibold">${Number(s.amount).toLocaleString()}</span>}
                 {s.deadline && (
                   <span className={`text-xs whitespace-nowrap ${getUrgencyColor(s.deadline)}`}>{getUrgencyLabel(s.deadline)}</span>
@@ -322,7 +322,7 @@ export default function Scholarships() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-5">
+      <div className="space-y-5 w-full min-w-0">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
@@ -331,12 +331,12 @@ export default function Scholarships() {
               {activeScholarships.length} active · {archivedScholarships.length} archived
             </p>
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             <Button variant="outline" size="sm" onClick={() => exportCSV(scholarships)} disabled={scholarships.length === 0}>
               <Download className="h-4 w-4 mr-1" /> Export
             </Button>
             <Link to="/scholarships/new">
-              <Button className="gradient-primary border-0 text-white shadow-lg shadow-primary/20 rounded-xl">
+              <Button className="gradient-primary border-0 text-white shadow-lg shadow-primary/20 rounded-xl" size="sm">
                 <Plus className="h-4 w-4 mr-2" /> Add New
               </Button>
             </Link>
@@ -380,7 +380,7 @@ export default function Scholarships() {
 
           <div className="mt-4 space-y-4">
             {/* Filters */}
-            <div className="flex flex-col sm:flex-row gap-3">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Search applications..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />

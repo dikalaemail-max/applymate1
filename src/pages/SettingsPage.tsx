@@ -81,14 +81,14 @@ export default function SettingsPage() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6">
+      <div className="max-w-3xl mx-auto space-y-6 w-full min-w-0">
         <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Settings</h1>
 
         <Tabs defaultValue="profile">
-          <TabsList>
-            <TabsTrigger value="profile" className="gap-1.5"><User className="h-4 w-4" /> Account</TabsTrigger>
-            <TabsTrigger value="cv" className="gap-1.5"><FileText className="h-4 w-4" /> My Profile & CV</TabsTrigger>
-            <TabsTrigger value="security" className="gap-1.5"><Lock className="h-4 w-4" /> Security</TabsTrigger>
+          <TabsList className="w-full sm:w-auto flex overflow-x-auto">
+            <TabsTrigger value="profile" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none"><User className="h-4 w-4" /> Account</TabsTrigger>
+            <TabsTrigger value="cv" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none"><FileText className="h-4 w-4" /> Profile & CV</TabsTrigger>
+            <TabsTrigger value="security" className="gap-1.5 text-xs sm:text-sm flex-1 sm:flex-none"><Lock className="h-4 w-4" /> Security</TabsTrigger>
           </TabsList>
 
           <TabsContent value="profile" className="mt-4 space-y-6">

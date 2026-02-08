@@ -13,7 +13,7 @@ import ScholarshipForm from "./pages/ScholarshipForm";
 import ScholarshipDetail from "./pages/ScholarshipDetail";
 import SharedWithMe from "./pages/SharedWithMe";
 import SharedView from "./pages/SharedView";
-import AdminUsers from "./pages/AdminUsers";
+import AdminDashboard from "./pages/AdminDashboard";
 import SettingsPage from "./pages/SettingsPage";
 import Community from "./pages/Community";
 import NotFound from "./pages/NotFound";
@@ -36,7 +36,8 @@ const App = () => (
             <Route path="/scholarships/new" element={<ProtectedRoute><ScholarshipForm /></ProtectedRoute>} />
             <Route path="/scholarships/:id" element={<ProtectedRoute><ScholarshipDetail /></ProtectedRoute>} />
             <Route path="/shared" element={<ProtectedRoute><SharedWithMe /></ProtectedRoute>} />
-            <Route path="/admin/users" element={<ProtectedRoute><AdminUsers /></ProtectedRoute>} />
+            <Route path="/admin/users" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
+            <Route path="/admin" element={<ProtectedRoute><AdminDashboard /></ProtectedRoute>} />
             <Route path="/community" element={<ProtectedRoute><Community /></ProtectedRoute>} />
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />

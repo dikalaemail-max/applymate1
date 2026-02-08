@@ -10,7 +10,7 @@ export function DashboardLayout({ children }: { children: ReactNode }) {
         {/* Subtle mesh gradient overlay on main content */}
         <div className="absolute inset-0 mesh-gradient pointer-events-none opacity-50" />
         <MobileNav />
-        <main className="relative flex-1 p-4 md:p-8 overflow-auto">{children}</main>
+        <main className="relative flex-1 p-4 md:p-8 overflow-x-hidden overflow-y-auto">{children}</main>
       </div>
     </div>
   );

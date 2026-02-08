@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
 import { format } from "date-fns";
+import { Share2, Inbox } from "lucide-react";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Scholarship = Tables<"scholarships">;
@@ -36,35 +37,41 @@ export default function SharedWithMe() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-6">
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Shared with Me</h1>
-          <p className="text-muted-foreground mt-1">Scholarships friends have shared</p>
+      <div className="space-y-6 max-w-4xl mx-auto w-full min-w-0">
+        <div className="flex items-center gap-3">
+          <div className="p-2 rounded-xl bg-foreground/5">
+            <Share2 className="h-5 w-5" />
+          </div>
+          <div>
+            <h1 className="text-2xl md:text-3xl font-bold tracking-tight">Shared with Me</h1>
+            <p className="text-muted-foreground mt-0.5 text-sm">Scholarships friends have shared</p>
+          </div>
         </div>
 
         {loading ? (
           <div className="flex justify-center py-12">
-            <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+            <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
           </div>
         ) : scholarships.length === 0 ? (
-          <Card>
-            <CardContent className="py-12 text-center">
+          <Card className="glass-card rounded-2xl border-0">
+            <CardContent className="py-16 text-center">
+              <Inbox className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
               <p className="text-muted-foreground">No shared scholarships yet</p>
             </CardContent>
           </Card>
         ) : (
-          <div className="grid gap-3">
+          <div className="grid gap-2">
             {scholarships.map((s) => (
-              <Card key={s.id}>
+              <Card key={s.id} className="glass-card rounded-2xl border-0 hover-lift">
                 <CardContent className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 py-4 px-5">
                   <div className="min-w-0 flex-1">
                     <p className="font-semibold truncate">{s.name}</p>
                     <p className="text-sm text-muted-foreground">{s.organization || "—"}</p>
                   </div>
                   <div className="flex items-center gap-3 shrink-0">
-                    {s.amount && <span className="text-sm font-semibold">${Number(s.amount).toLocaleString()}</span>}
+                    {s.amount && <span className="text-sm font-semibold tabular-nums">${Number(s.amount).toLocaleString()}</span>}
                     {s.deadline && <span className="text-xs text-muted-foreground">{format(new Date(s.deadline), "MMM d, yyyy")}</span>}
-                    <Badge variant="secondary">{statusLabels[s.status]}</Badge>
+                    <Badge variant="secondary" className="rounded-lg">{statusLabels[s.status]}</Badge>
                   </div>
                 </CardContent>
               </Card>

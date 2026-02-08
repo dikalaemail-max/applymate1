@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { DashboardLayout } from "@/components/layout/DashboardLayout";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { CommunityPostCard } from "@/components/community/CommunityPostCard";
 import { ThreadPanel } from "@/components/community/ThreadPanel";
@@ -29,7 +29,6 @@ export default function Community() {
   const [activeThread, setActiveThread] = useState<string | null>(null);
 
   const fetchPosts = useCallback(async () => {
-    // Fetch posts
     let query = supabase
       .from("community_posts")
       .select("*")
@@ -38,7 +37,6 @@ export default function Community() {
     const { data: postsData } = await query;
     if (!postsData) { setLoading(false); return; }
 
-    // Fetch reply counts
     const postIds = postsData.map((p) => p.id);
     const { data: repliesData } = await supabase
       .from("community_replies")
@@ -50,7 +48,6 @@ export default function Community() {
       replyCounts[r.post_id] = (replyCounts[r.post_id] || 0) + 1;
     });
 
-    // Fetch linked scholarship names
     const scholarshipIds = postsData
       .map((p) => p.scholarship_id)
       .filter(Boolean) as string[];
@@ -75,14 +72,12 @@ export default function Community() {
 
   useEffect(() => {
     fetchPosts();
-
     const channel = supabase
       .channel("community-posts-realtime")
       .on("postgres_changes", { event: "*", schema: "public", table: "community_posts" }, () => {
         fetchPosts();
       })
       .subscribe();
-
     return () => { supabase.removeChannel(channel); };
   }, [fetchPosts]);
 
@@ -110,11 +105,12 @@ export default function Community() {
   return (
     <DashboardLayout>
       <div className="flex h-[calc(100vh-2rem)] md:h-[calc(100vh-4rem)] gap-0 -m-4 md:-m-8 min-w-0">
-        {/* Main feed */}
         <div className={`flex-1 flex flex-col min-w-0 ${activeThread ? "hidden md:flex" : "flex"}`}>
           <div className="px-4 md:px-6 pt-4 md:pt-6 pb-3 space-y-4 shrink-0">
             <div className="flex items-center gap-3">
-              <MessageCircle className="h-6 w-6 text-primary" />
+              <div className="p-2 rounded-xl bg-foreground/5">
+                <MessageCircle className="h-5 w-5" />
+              </div>
               <h1 className="text-2xl font-bold tracking-tight">Community</h1>
             </div>
 
@@ -124,11 +120,11 @@ export default function Community() {
                 placeholder="Search posts, users, or applications..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 h-9"
+                className="pl-9 h-10 rounded-xl"
               />
             </div>
 
-            <Card>
+            <Card className="glass-card rounded-2xl border-0">
               <CardContent className="pt-4 pb-3">
                 <NewPostForm onPosted={fetchPosts} />
               </CardContent>
@@ -137,7 +133,9 @@ export default function Community() {
 
           <div className="flex-1 overflow-y-auto px-4 md:px-6 pb-4 space-y-2">
             {loading ? (
-              <p className="text-sm text-muted-foreground text-center py-12">Loading...</p>
+              <div className="flex justify-center py-12">
+                <div className="h-6 w-6 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
+              </div>
             ) : filtered.length === 0 ? (
               <p className="text-sm text-muted-foreground text-center py-12">
                 {search ? "No posts match your search." : "No posts yet. Be the first to share!"}
@@ -156,7 +154,6 @@ export default function Community() {
           </div>
         </div>
 
-        {/* Thread panel */}
         {activeThread && activePost && (
           <div className={`w-full md:w-[380px] lg:w-[420px] shrink-0 ${activeThread ? "flex" : "hidden"}`}>
             <ThreadPanel

@@ -1,9 +1,10 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Sparkles, Send, Copy, Loader2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import { useAiCache } from "@/hooks/useAiCache";
 import { supabase } from "@/integrations/supabase/client";
 import type { Tables } from "@/integrations/supabase/types";
 
@@ -19,10 +20,27 @@ const CHAT_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/essay-assist
 
 export function EssayAssistant({ scholarship }: Props) {
   const { toast } = useToast();
+  const { getCached, setCached } = useAiCache();
   const [messages, setMessages] = useState<Msg[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
+
+  // Restore cached conversation
+  useEffect(() => {
+    getCached("essay_history", scholarship.id).then((cached) => {
+      if (cached?.result_data?.messages?.length) {
+        setMessages(cached.result_data.messages);
+      }
+    });
+  }, [getCached, scholarship.id]);
+
+  // Persist conversation on change
+  useEffect(() => {
+    if (messages.length > 0) {
+      setCached("essay_history", { messages }, scholarship.id);
+    }
+  }, [messages, setCached, scholarship.id]);
 
   const send = async () => {
     const prompt = input.trim();
@@ -49,10 +67,8 @@ export function EssayAssistant({ scholarship }: Props) {
         },
         body: JSON.stringify({
           scholarshipContext: {
-            name: scholarship.name,
-            organization: scholarship.organization,
-            amount: scholarship.amount,
-            eligibility_notes: scholarship.eligibility_notes,
+            name: scholarship.name, organization: scholarship.organization,
+            amount: scholarship.amount, eligibility_notes: scholarship.eligibility_notes,
             notes: scholarship.notes,
           },
           userPrompt: prompt,
@@ -64,7 +80,6 @@ export function EssayAssistant({ scholarship }: Props) {
         const err = await resp.json().catch(() => ({}));
         throw new Error(err.error || `Error ${resp.status}`);
       }
-
       if (!resp.body) throw new Error("No response body");
 
       const reader = resp.body.getReader();
@@ -125,15 +140,17 @@ export function EssayAssistant({ scholarship }: Props) {
   };
 
   return (
-    <Card>
+    <Card className="glass-card rounded-2xl border-0">
       <CardHeader className="pb-3">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Sparkles className="h-5 w-5 text-primary" />
+        <CardTitle className="text-base flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-foreground/5">
+            <Sparkles className="h-4 w-4" />
+          </div>
           AI Writing Assistant
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-3">
-        <div ref={scrollRef} className="max-h-[300px] overflow-y-auto space-y-3 rounded-lg border p-3 bg-muted/30">
+        <div ref={scrollRef} className="max-h-[300px] overflow-y-auto space-y-3 rounded-xl border p-3 bg-muted/20">
           {messages.length === 0 && (
             <p className="text-sm text-muted-foreground text-center py-4">
               Ask me to draft an essay, improve your writing, or brainstorm ideas for this application.
@@ -141,7 +158,7 @@ export function EssayAssistant({ scholarship }: Props) {
           )}
           {messages.map((m, i) => (
             <div key={i} className={`text-sm ${m.role === "user" ? "text-right" : ""}`}>
-              <div className={`inline-block max-w-[85%] rounded-lg px-3 py-2 ${m.role === "user" ? "bg-primary text-primary-foreground" : "bg-background border"}`}>
+              <div className={`inline-block max-w-[85%] rounded-xl px-3 py-2 ${m.role === "user" ? "bg-foreground text-background" : "bg-background border"}`}>
                 <p className="whitespace-pre-wrap">{m.content}</p>
               </div>
             </div>
@@ -157,16 +174,16 @@ export function EssayAssistant({ scholarship }: Props) {
           <Textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="e.g. Draft a 200-word personal statement about my passion for engineering..."
-            className="min-h-[60px] flex-1"
+            placeholder="e.g. Draft a 200-word personal statement..."
+            className="min-h-[60px] flex-1 rounded-xl"
             onKeyDown={(e) => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); send(); } }}
           />
           <div className="flex flex-col gap-1">
-            <Button size="icon" onClick={send} disabled={isLoading || !input.trim()}>
+            <Button size="icon" onClick={send} disabled={isLoading || !input.trim()} className="rounded-xl">
               <Send className="h-4 w-4" />
             </Button>
             {messages.some((m) => m.role === "assistant") && (
-              <Button size="icon" variant="outline" onClick={copyLast}>
+              <Button size="icon" variant="outline" onClick={copyLast} className="rounded-xl">
                 <Copy className="h-4 w-4" />
               </Button>
             )}

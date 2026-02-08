@@ -147,10 +147,10 @@ export default function ScholarshipDetail() {
 
   return (
     <DashboardLayout>
-      <div className="max-w-3xl mx-auto space-y-6 w-full min-w-0">
+      <div className="max-w-3xl mx-auto space-y-5 w-full min-w-0">
         <div className="flex flex-col gap-3">
           <div className="flex items-center gap-2">
-            <Button variant="ghost" onClick={() => navigate("/scholarships")} className="gap-2 w-fit" size="sm">
+            <Button variant="ghost" onClick={() => navigate("/scholarships")} className="gap-2 w-fit rounded-xl" size="sm">
               <ArrowLeft className="h-4 w-4" /> Back
             </Button>
             <button
@@ -159,13 +159,13 @@ export default function ScholarshipDetail() {
                 await supabase.from("scholarships").update({ is_favorited: newVal }).eq("id", scholarship.id);
                 setScholarship({ ...scholarship, is_favorited: newVal });
               }}
-              className="p-2 rounded-lg hover:bg-accent transition-colors"
+              className="p-2 rounded-xl hover:bg-accent transition-colors"
             >
               <Star className={`h-4 w-4 ${scholarship.is_favorited ? "text-amber-400 fill-amber-400" : "text-muted-foreground"}`} />
             </button>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={handleShare}>
+            <Button variant="outline" size="sm" onClick={handleShare} className="rounded-xl">
               <Share2 className="h-4 w-4 mr-1" /> Share
             </Button>
             <Button
@@ -177,30 +177,30 @@ export default function ScholarshipDetail() {
                 setScholarship({ ...scholarship, status: newStatus as ScholarshipStatus });
                 toast({ title: newStatus === "archived" ? "Archived" : "Restored" });
               }}
-              className="gap-1"
+              className="gap-1 rounded-xl"
             >
               {scholarship.status === "archived" ? <ArchiveRestore className="h-4 w-4" /> : <Archive className="h-4 w-4" />}
               {scholarship.status === "archived" ? "Restore" : "Archive"}
             </Button>
             {!editing ? (
-              <Button size="sm" onClick={() => setEditing(true)}>Edit</Button>
+              <Button size="sm" onClick={() => setEditing(true)} className="rounded-xl bg-foreground text-background hover:bg-foreground/90">Edit</Button>
             ) : (
               <>
-                <Button size="sm" onClick={handleUpdate}>Save</Button>
-                <Button variant="ghost" size="sm" onClick={() => setEditing(false)}>Cancel</Button>
+                <Button size="sm" onClick={handleUpdate} className="rounded-xl bg-foreground text-background hover:bg-foreground/90">Save</Button>
+                <Button variant="ghost" size="sm" onClick={() => setEditing(false)} className="rounded-xl">Cancel</Button>
               </>
             )}
-            <Button variant="destructive" size="sm" onClick={handleDelete}>
+            <Button variant="destructive" size="sm" onClick={handleDelete} className="rounded-xl">
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
         </div>
 
-        <Card>
+        <Card className="glass-card rounded-2xl border-0">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               {editing ? (
-                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+                <Input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} className="rounded-xl" />
               ) : (
                 <>
                   {scholarship.name}
@@ -219,20 +219,20 @@ export default function ScholarshipDetail() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label>Organization</Label>
-                    <Input value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} />
+                    <Input value={form.organization} onChange={(e) => setForm({ ...form, organization: e.target.value })} className="rounded-xl" />
                   </div>
                   <div className="space-y-2">
                     <Label>Amount ($)</Label>
-                    <Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} />
+                    <Input type="number" value={form.amount} onChange={(e) => setForm({ ...form, amount: e.target.value })} className="rounded-xl" />
                   </div>
                   <div className="space-y-2">
                     <Label>Deadline</Label>
-                    <Input type="date" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} />
+                    <Input type="date" value={form.deadline} onChange={(e) => setForm({ ...form, deadline: e.target.value })} className="rounded-xl" />
                   </div>
                   <div className="space-y-2">
                     <Label>Status</Label>
                     <Select value={form.status} onValueChange={(v) => setForm({ ...form, status: v as ScholarshipStatus })}>
-                      <SelectTrigger><SelectValue /></SelectTrigger>
+                      <SelectTrigger className="rounded-xl"><SelectValue /></SelectTrigger>
                       <SelectContent>
                         {Object.entries(statusLabels).map(([k, v]) => (
                           <SelectItem key={k} value={k}>{v}</SelectItem>
@@ -243,19 +243,19 @@ export default function ScholarshipDetail() {
                 </div>
                 <div className="space-y-2">
                   <Label>Link</Label>
-                  <Input value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} />
+                  <Input value={form.link} onChange={(e) => setForm({ ...form, link: e.target.value })} className="rounded-xl" />
                 </div>
                 <div className="space-y-2">
                   <Label>Tags</Label>
-                  <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} />
+                  <Input value={form.tags} onChange={(e) => setForm({ ...form, tags: e.target.value })} className="rounded-xl" />
                 </div>
                 <div className="space-y-2">
                   <Label>Eligibility Notes</Label>
-                  <Textarea value={form.eligibility_notes} onChange={(e) => setForm({ ...form, eligibility_notes: e.target.value })} />
+                  <Textarea value={form.eligibility_notes} onChange={(e) => setForm({ ...form, eligibility_notes: e.target.value })} className="rounded-xl" />
                 </div>
                 <div className="space-y-2">
                   <Label>Notes</Label>
-                  <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={6} />
+                  <Textarea value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} rows={6} className="rounded-xl" />
                 </div>
               </>
             ) : (
@@ -263,10 +263,10 @@ export default function ScholarshipDetail() {
                 <div><span className="text-muted-foreground">Organization:</span> <span className="font-medium">{scholarship.organization || "—"}</span></div>
                 <div><span className="text-muted-foreground">Amount:</span> <span className="font-medium">{scholarship.amount ? `$${Number(scholarship.amount).toLocaleString()}` : "—"}</span></div>
                 <div><span className="text-muted-foreground">Deadline:</span> <span className="font-medium">{scholarship.deadline ? format(new Date(scholarship.deadline), "MMM d, yyyy") : "—"}</span></div>
-                <div><span className="text-muted-foreground">Status:</span> <Badge variant="secondary">{statusLabels[scholarship.status]}</Badge></div>
+                <div><span className="text-muted-foreground">Status:</span> <Badge variant="secondary" className="rounded-lg">{statusLabels[scholarship.status]}</Badge></div>
                 {scholarship.tags && scholarship.tags.length > 0 && (
                   <div className="col-span-2 flex gap-1 flex-wrap">
-                    {scholarship.tags.map((t) => <Badge key={t} variant="outline">{t}</Badge>)}
+                    {scholarship.tags.map((t) => <Badge key={t} variant="outline" className="rounded-lg">{t}</Badge>)}
                   </div>
                 )}
                 {scholarship.eligibility_notes && (
@@ -287,17 +287,20 @@ export default function ScholarshipDetail() {
         </Card>
 
         <SuccessMeter scholarship={scholarship} />
-
         <ApplicationChecklist scholarship={scholarship} />
-
         <EssayAssistant scholarship={scholarship} />
 
-        <Card>
+        <Card className="glass-card rounded-2xl border-0">
           <CardHeader className="flex flex-row items-center justify-between">
-            <CardTitle className="text-lg">Files</CardTitle>
+            <CardTitle className="text-base flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-foreground/5">
+                <Upload className="h-3.5 w-3.5" />
+              </div>
+              Files
+            </CardTitle>
             <label className="cursor-pointer">
               <input type="file" className="hidden" onChange={handleFileUpload} disabled={uploading} />
-              <Button variant="outline" size="sm" asChild>
+              <Button variant="outline" size="sm" asChild className="rounded-xl">
                 <span><Upload className="h-4 w-4 mr-1" />{uploading ? "Uploading..." : "Upload"}</span>
               </Button>
             </label>
@@ -308,7 +311,7 @@ export default function ScholarshipDetail() {
             ) : (
               <div className="space-y-2">
                 {files.map((f) => (
-                  <div key={f.id} className="flex items-center justify-between p-2 rounded border text-sm">
+                  <div key={f.id} className="flex items-center justify-between p-3 rounded-xl border text-sm bg-muted/20">
                     <span className="truncate">{f.file_name}</span>
                     <span className="text-muted-foreground text-xs">{f.file_size ? `${(f.file_size / 1024).toFixed(0)} KB` : ""}</span>
                   </div>

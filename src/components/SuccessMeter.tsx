@@ -1,9 +1,10 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Progress } from "@/components/ui/progress";
 import { supabase } from "@/integrations/supabase/client";
+import { useAiCache } from "@/hooks/useAiCache";
 import { Gauge, TrendingUp, AlertTriangle, Lightbulb, RefreshCw, UserCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import type { Tables } from "@/integrations/supabase/types";
@@ -20,21 +21,21 @@ interface Analysis {
 }
 
 const confidenceColors: Record<string, string> = {
-  low: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-400",
-  medium: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  high: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  low: "bg-warning/10 text-warning",
+  medium: "bg-primary/10 text-primary",
+  high: "bg-success/10 text-success",
 };
 
 function getScoreColor(score: number) {
-  if (score >= 70) return "text-green-600 dark:text-green-400";
-  if (score >= 40) return "text-yellow-600 dark:text-yellow-400";
-  return "text-red-500";
+  if (score >= 70) return "text-success";
+  if (score >= 40) return "text-warning";
+  return "text-destructive";
 }
 
 function getProgressColor(score: number) {
-  if (score >= 70) return "[&>div]:bg-green-500";
-  if (score >= 40) return "[&>div]:bg-yellow-500";
-  return "[&>div]:bg-red-500";
+  if (score >= 70) return "[&>div]:bg-success";
+  if (score >= 40) return "[&>div]:bg-warning";
+  return "[&>div]:bg-destructive";
 }
 
 export function SuccessMeter({ scholarship }: { scholarship: Scholarship }) {
@@ -43,6 +44,16 @@ export function SuccessMeter({ scholarship }: { scholarship: Scholarship }) {
   const [error, setError] = useState<string | null>(null);
   const [incompleteProfile, setIncompleteProfile] = useState(false);
   const navigate = useNavigate();
+  const { getCached, setCached } = useAiCache();
+
+  // Restore cached analysis
+  useEffect(() => {
+    getCached("success_meter", scholarship.id).then((cached) => {
+      if (cached?.result_data?.analysis) {
+        setAnalysis(cached.result_data.analysis);
+      }
+    });
+  }, [getCached, scholarship.id]);
 
   const analyze = async () => {
     setLoading(true);
@@ -53,12 +64,10 @@ export function SuccessMeter({ scholarship }: { scholarship: Scholarship }) {
         body: { scholarshipId: scholarship.id },
       });
       if (fnError) throw fnError;
-      if (data.error === "incomplete_profile") {
-        setIncompleteProfile(true);
-        return;
-      }
+      if (data.error === "incomplete_profile") { setIncompleteProfile(true); return; }
       if (data.error) throw new Error(data.error);
       setAnalysis(data.analysis);
+      await setCached("success_meter", { analysis: data.analysis }, scholarship.id);
     } catch (e: any) {
       setError(e.message || "Failed to analyze");
     } finally {
@@ -67,27 +76,23 @@ export function SuccessMeter({ scholarship }: { scholarship: Scholarship }) {
   };
 
   return (
-    <Card>
+    <Card className="glass-card rounded-2xl border-0">
       <CardHeader className="flex flex-row items-center justify-between">
-        <CardTitle className="text-lg flex items-center gap-2">
-          <Gauge className="h-5 w-5" />
+        <CardTitle className="text-base flex items-center gap-2">
+          <div className="p-1.5 rounded-lg bg-foreground/5">
+            <Gauge className="h-4 w-4" />
+          </div>
           Success Meter
         </CardTitle>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={analyze}
-          disabled={loading}
-          className="gap-1.5"
-        >
-          <RefreshCw className={`h-3.5 w-3.5 ${loading ? "animate-spin" : ""}`} />
+        <Button variant="outline" size="sm" onClick={analyze} disabled={loading} className="gap-1.5 rounded-xl text-xs h-8">
+          <RefreshCw className={`h-3 w-3 ${loading ? "animate-spin" : ""}`} />
           {analysis ? "Re-analyze" : "Analyze"}
         </Button>
       </CardHeader>
       <CardContent>
         {!analysis && !loading && !error && !incompleteProfile && (
           <p className="text-sm text-muted-foreground">
-            Get an AI-powered estimate of your chances based on your profile and this scholarship's requirements.
+            AI-powered estimate of your chances based on your profile and this scholarship's requirements.
           </p>
         )}
 
@@ -95,7 +100,7 @@ export function SuccessMeter({ scholarship }: { scholarship: Scholarship }) {
           <div className="text-center py-4 space-y-3">
             <UserCircle className="h-8 w-8 mx-auto text-muted-foreground/50" />
             <p className="text-sm text-muted-foreground">Complete your profile to get a success estimate.</p>
-            <Button variant="outline" size="sm" onClick={() => navigate("/settings")}>
+            <Button variant="outline" size="sm" onClick={() => navigate("/settings")} className="rounded-xl">
               Complete Profile
             </Button>
           </div>
@@ -103,18 +108,15 @@ export function SuccessMeter({ scholarship }: { scholarship: Scholarship }) {
 
         {loading && (
           <div className="flex items-center gap-3 py-4">
-            <div className="h-5 w-5 animate-spin rounded-full border-2 border-primary border-t-transparent" />
+            <div className="h-5 w-5 animate-spin rounded-full border-2 border-foreground border-t-transparent" />
             <p className="text-sm text-muted-foreground">Analyzing your match...</p>
           </div>
         )}
 
-        {error && (
-          <p className="text-sm text-destructive">{error}</p>
-        )}
+        {error && <p className="text-sm text-destructive">{error}</p>}
 
         {analysis && !loading && (
           <div className="space-y-4">
-            {/* Score */}
             <div className="flex items-center gap-4">
               <div className="text-center">
                 <p className={`text-3xl font-bold ${getScoreColor(analysis.score)}`}>{analysis.score}%</p>
@@ -128,48 +130,45 @@ export function SuccessMeter({ scholarship }: { scholarship: Scholarship }) {
               </div>
             </div>
 
-            {/* Strengths */}
             {analysis.strengths.length > 0 && (
               <div>
                 <p className="text-sm font-medium flex items-center gap-1.5 mb-1.5">
-                  <TrendingUp className="h-3.5 w-3.5 text-green-500" /> Strengths
+                  <TrendingUp className="h-3.5 w-3.5 text-success" /> Strengths
                 </p>
                 <ul className="space-y-1">
                   {analysis.strengths.map((s, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-green-500 mt-1">•</span> {s}
+                      <span className="text-success mt-1">•</span> {s}
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {/* Gaps */}
             {analysis.gaps.length > 0 && (
               <div>
                 <p className="text-sm font-medium flex items-center gap-1.5 mb-1.5">
-                  <AlertTriangle className="h-3.5 w-3.5 text-yellow-500" /> Areas to Improve
+                  <AlertTriangle className="h-3.5 w-3.5 text-warning" /> Areas to Improve
                 </p>
                 <ul className="space-y-1">
                   {analysis.gaps.map((g, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-yellow-500 mt-1">•</span> {g}
+                      <span className="text-warning mt-1">•</span> {g}
                     </li>
                   ))}
                 </ul>
               </div>
             )}
 
-            {/* Tips */}
             {analysis.tips.length > 0 && (
               <div>
                 <p className="text-sm font-medium flex items-center gap-1.5 mb-1.5">
-                  <Lightbulb className="h-3.5 w-3.5 text-primary" /> Tips
+                  <Lightbulb className="h-3.5 w-3.5" /> Tips
                 </p>
                 <ul className="space-y-1">
                   {analysis.tips.map((t, i) => (
                     <li key={i} className="text-sm text-muted-foreground flex items-start gap-2">
-                      <span className="text-primary mt-1">•</span> {t}
+                      <span className="mt-1">•</span> {t}
                     </li>
                   ))}
                 </ul>

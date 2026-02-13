@@ -22,7 +22,7 @@ export function MobileNav() {
     <>
       <header className="md:hidden flex items-center justify-between px-4 py-3 bg-sidebar text-sidebar-foreground border-b border-sidebar-border">
         <div className="flex items-center gap-2.5">
-          <ApplyMateLogo size="sm" className="text-sidebar-foreground" />
+          <ApplyMateLogo size="sm" className="text-primary" />
           <span className="text-lg font-bold" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>ApplyMate</span>
         </div>
         <button onClick={() => setOpen(!open)} className="p-1 rounded-lg hover:bg-sidebar-accent/50 transition-colors">
@@ -46,7 +46,7 @@ export function MobileNav() {
                     : "text-sidebar-foreground/60"
                 )}
               >
-                <item.icon className={cn("h-4 w-4", active && "text-[hsl(var(--sidebar-primary))]")} />
+                <item.icon className={cn("h-4 w-4", active && "text-primary")} />
                 {item.label}
               </Link>
             );

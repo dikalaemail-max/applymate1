@@ -21,6 +21,7 @@ import { FocusNext } from "@/components/FocusNext";
 import { StreakCounter } from "@/components/StreakCounter";
 import { GoalTracker } from "@/components/GoalTracker";
 import { ScholarshipRecommender } from "@/components/ScholarshipRecommender";
+import { ApplicationPipeline } from "@/components/ApplicationPipeline";
 import type { Tables } from "@/integrations/supabase/types";
 
 type Scholarship = Tables<"scholarships">;
@@ -273,56 +274,14 @@ export default function Dashboard() {
           </Card>
         </div>
 
-        {/* Pipeline + Profile Strength */}
-        <div>
-          <p className="section-label mb-3">Pipeline</p>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
-            <Card className="glass-card rounded-2xl border-0 lg:col-span-2">
-              <CardHeader className="pb-2">
-                <CardTitle className="text-base flex items-center gap-2">
-                  <div className="stat-card-icon">
-                    <Flame className="h-3.5 w-3.5" />
-                  </div>
-                  Application Pipeline
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {loading ? (
-                  <p className="text-sm text-muted-foreground">Loading...</p>
-                ) : total === 0 ? (
-                  <p className="text-sm text-muted-foreground py-4">Add your first application to see your pipeline.</p>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex h-4 rounded-full overflow-hidden bg-muted">
-                      {[
-                        { count: saved, color: "bg-muted-foreground/40" },
-                        { count: inProgress, color: "bg-foreground/60" },
-                        { count: submitted, color: "bg-foreground" },
-                        { count: awarded, color: "bg-success" },
-                        { count: rejected, color: "bg-destructive" },
-                      ].map((seg, i) => seg.count > 0 && (
-                        <div key={i} className={`${seg.color} transition-all duration-500`} style={{ width: `${(seg.count / total) * 100}%` }} />
-                      ))}
-                    </div>
-                    <div className="grid grid-cols-3 sm:grid-cols-5 gap-2">
-                      {[
-                        { label: "Saved", count: saved },
-                        { label: "In Progress", count: inProgress },
-                        { label: "Submitted", count: submitted },
-                        { label: "Awarded", count: awarded },
-                        { label: "Rejected", count: rejected },
-                      ].map((item) => (
-                        <div key={item.label} className="text-center">
-                          <p className="text-lg font-bold tabular-nums">{item.count}</p>
-                          <p className="text-[10px] text-muted-foreground">{item.label}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+        {/* Visual Pipeline + Profile Strength */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3">
+          <div className="lg:col-span-2">
+            <ApplicationPipeline scholarships={scholarships} loading={loading} />
+          </div>
 
+          <div className="space-y-3">
+            <p className="section-label">Profile</p>
             <Card className="glass-card rounded-2xl border-0">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">

@@ -7,7 +7,7 @@ import { BookOpen, ExternalLink } from "lucide-react";
 import { format } from "date-fns";
 import type { Tables } from "@/integrations/supabase/types";
 
-type SharedScholarship = Omit<Tables<"scholarships">, "share_token" | "user_id" | "is_favorited" | "position">;
+type SharedScholarship = Omit<Tables<"scholarships">, "share_token" | "user_id" | "is_favorited" | "position" | "application_type">;
 
 const statusLabels: Record<string, string> = {
   saved: "Saved", in_progress: "In Progress", submitted: "Submitted", awarded: "Awarded", rejected: "Rejected",

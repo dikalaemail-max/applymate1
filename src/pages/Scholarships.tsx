@@ -12,20 +12,21 @@ import { useAuth } from "@/contexts/AuthContext";
 import {
   Plus, Search, ExternalLink, Download, LayoutGrid, LayoutList, X,
   GripVertical, Star, Archive, ArchiveRestore, Trash2, CheckSquare,
+  GraduationCap, Briefcase,
 } from "lucide-react";
 import { format, isPast, differenceInDays } from "date-fns";
 import { DragDropContext, Droppable, Draggable, type DropResult } from "@hello-pangea/dnd";
 import { useToast } from "@/hooks/use-toast";
 import type { Tables, Database } from "@/integrations/supabase/types";
 
-type Scholarship = Tables<"scholarships">;
+type Scholarship = Tables<"scholarships"> & { application_type?: string };
 type ScholarshipStatus = Database["public"]["Enums"]["scholarship_status"];
 
 const statusColors: Record<string, string> = {
   saved: "bg-secondary text-secondary-foreground",
-  in_progress: "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-400",
-  submitted: "bg-purple-100 text-purple-800 dark:bg-purple-900/30 dark:text-purple-400",
-  awarded: "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400",
+  in_progress: "bg-blue-900/30 text-blue-400",
+  submitted: "bg-purple-900/30 text-purple-400",
+  awarded: "bg-green-900/30 text-green-400",
   rejected: "bg-destructive/10 text-destructive",
   archived: "bg-muted text-muted-foreground",
 };
@@ -43,7 +44,7 @@ function getUrgencyColor(deadline: string) {
   const days = differenceInDays(new Date(deadline), new Date());
   if (days < 0) return "text-destructive";
   if (days <= 3) return "text-destructive";
-  if (days <= 7) return "text-yellow-600 dark:text-yellow-400";
+  if (days <= 7) return "text-yellow-400";
   return "text-muted-foreground";
 }
 
@@ -57,12 +58,12 @@ function getUrgencyLabel(deadline: string) {
 }
 
 function exportCSV(scholarships: Scholarship[]) {
-  const headers = ["Name", "Organization", "Amount", "Deadline", "Status", "Tags", "Link", "Notes"];
+  const headers = ["Name", "Organization", "Amount", "Deadline", "Status", "Type", "Tags", "Link", "Notes"];
   const rows = scholarships.map((s) => [
     s.name, s.organization || "", s.amount?.toString() || "",
     s.deadline ? format(new Date(s.deadline), "yyyy-MM-dd") : "",
-    statusLabels[s.status] || s.status, (s.tags || []).join("; "),
-    s.link || "", (s.notes || "").replace(/\n/g, " "),
+    statusLabels[s.status] || s.status, s.application_type || "scholarship",
+    (s.tags || []).join("; "), s.link || "", (s.notes || "").replace(/\n/g, " "),
   ]);
   const csv = [headers, ...rows].map((r) => r.map((c) => `"${c.replace(/"/g, '""')}"`).join(",")).join("\n");
   const blob = new Blob([csv], { type: "text/csv" });
@@ -73,6 +74,8 @@ function exportCSV(scholarships: Scholarship[]) {
   a.click();
   URL.revokeObjectURL(url);
 }
+
+type CategoryTab = "scholarship" | "job";
 
 export default function Scholarships() {
   const { user } = useAuth();
@@ -87,6 +90,7 @@ export default function Scholarships() {
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [tab, setTab] = useState<"active" | "archived">("active");
   const [showAllTags, setShowAllTags] = useState(false);
+  const [category, setCategory] = useState<CategoryTab>("scholarship");
 
   const fetchScholarships = useCallback(async () => {
     if (!user) return;
@@ -95,17 +99,27 @@ export default function Scholarships() {
       .select("*")
       .eq("user_id", user.id)
       .order("position", { ascending: true });
-    setScholarships(data || []);
+    setScholarships((data as Scholarship[]) || []);
     setLoading(false);
   }, [user]);
 
   useEffect(() => { fetchScholarships(); }, [fetchScholarships]);
 
+  // Category counts
+  const scholarshipCount = useMemo(() => scholarships.filter(s => (s.application_type || 'scholarship') === 'scholarship' && s.status !== 'archived').length, [scholarships]);
+  const jobCount = useMemo(() => scholarships.filter(s => s.application_type === 'job' && s.status !== 'archived').length, [scholarships]);
+
+  // Filter by category first
+  const categoryFiltered = useMemo(() =>
+    scholarships.filter(s => (s.application_type || 'scholarship') === category),
+    [scholarships, category]
+  );
+
   const allTags = useMemo(() => {
     const set = new Set<string>();
-    scholarships.forEach((s) => s.tags?.forEach((t) => set.add(t)));
+    categoryFiltered.forEach((s) => s.tags?.forEach((t) => set.add(t)));
     return Array.from(set).sort();
-  }, [scholarships]);
+  }, [categoryFiltered]);
 
   const toggleTag = (tag: string) => {
     setSelectedTags((prev) => (prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]));
@@ -121,8 +135,8 @@ export default function Scholarships() {
     });
   };
 
-  const activeScholarships = useMemo(() => scholarships.filter((s) => s.status !== "archived"), [scholarships]);
-  const archivedScholarships = useMemo(() => scholarships.filter((s) => s.status === "archived"), [scholarships]);
+  const activeScholarships = useMemo(() => categoryFiltered.filter((s) => s.status !== "archived"), [categoryFiltered]);
+  const archivedScholarships = useMemo(() => categoryFiltered.filter((s) => s.status === "archived"), [categoryFiltered]);
 
   const filtered = useMemo(() => {
     const source = tab === "active" ? activeScholarships : archivedScholarships;
@@ -158,7 +172,7 @@ export default function Scholarships() {
         break;
     }
     return result;
-  }, [scholarships, search, statusFilter, selectedTags, sortBy, tab, activeScholarships, archivedScholarships]);
+  }, [categoryFiltered, search, statusFilter, selectedTags, sortBy, tab, activeScholarships, archivedScholarships]);
 
   const handleDragEnd = async (result: DropResult) => {
     if (!result.destination || sortBy !== "position" || tab !== "active") return;
@@ -166,7 +180,6 @@ export default function Scholarships() {
     const [moved] = items.splice(result.source.index, 1);
     items.splice(result.destination.index, 0, moved);
 
-    // Optimistic update
     const updates = items.map((item, idx) => ({ ...item, position: idx }));
     setScholarships((prev) =>
       prev.map((s) => {
@@ -175,7 +188,6 @@ export default function Scholarships() {
       })
     );
 
-    // Persist
     await Promise.all(
       updates.map((item) =>
         supabase.from("scholarships").update({ position: item.position }).eq("id", item.id)
@@ -229,7 +241,7 @@ export default function Scholarships() {
   const renderCard = (s: Scholarship, index: number) => {
     const isSelected = selectedIds.has(s.id);
     const inner = (
-      <Card className={`hover:shadow-md transition-all cursor-pointer group ${isSelected ? "ring-2 ring-primary" : ""} ${s.is_favorited ? "border-amber-300/50" : ""}`}>
+      <Card className={`glass-card rounded-2xl border-0 hover-lift transition-all cursor-pointer group ${isSelected ? "ring-2 ring-primary" : ""} ${s.is_favorited ? "border-amber-300/20" : ""}`}>
         <CardContent className={compact ? "py-3 px-4" : "flex items-center gap-3 py-3 px-4"}>
           {!compact && isDragEnabled && (
             <div className="cursor-grab active:cursor-grabbing text-muted-foreground/40 hover:text-muted-foreground shrink-0">
@@ -322,25 +334,101 @@ export default function Scholarships() {
 
   return (
     <DashboardLayout>
-      <div className="space-y-5 w-full min-w-0">
+      <div className="space-y-6 w-full min-w-0">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div>
+            <p className="section-label mb-2">Applications</p>
             <h1 className="text-2xl md:text-3xl font-bold tracking-tight">My Applications</h1>
-            <p className="text-muted-foreground mt-1">
-              {activeScholarships.length} active · {archivedScholarships.length} archived
-            </p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Button variant="outline" size="sm" onClick={() => exportCSV(scholarships)} disabled={scholarships.length === 0}>
+            <Button variant="outline" size="sm" onClick={() => exportCSV(scholarships)} disabled={scholarships.length === 0} className="rounded-xl">
               <Download className="h-4 w-4 mr-1" /> Export
             </Button>
-            <Link to="/scholarships/new">
+            <Link to={`/scholarships/new?type=${category}`}>
               <Button className="gradient-primary border-0 text-white shadow-lg shadow-primary/20 rounded-xl" size="sm">
-                <Plus className="h-4 w-4 mr-2" /> Add New
+                <Plus className="h-4 w-4 mr-2" /> Add {category === 'scholarship' ? 'Scholarship' : 'Job'}
               </Button>
             </Link>
           </div>
+        </div>
+
+        {/* Category Tabs — beautiful colored switcher */}
+        <div className="flex gap-3">
+          <button
+            onClick={() => { setCategory("scholarship"); setSelectedIds(new Set()); setSearch(""); setSelectedTags([]); }}
+            className={`group relative flex-1 rounded-2xl p-5 transition-all duration-300 overflow-hidden ${
+              category === "scholarship"
+                ? "ring-2 ring-purple-500/50"
+                : "hover:ring-1 hover:ring-border"
+            }`}
+          >
+            {/* Background gradient */}
+            <div className={`absolute inset-0 transition-opacity duration-300 ${
+              category === "scholarship" ? "opacity-100" : "opacity-0 group-hover:opacity-50"
+            }`} style={{
+              background: "linear-gradient(135deg, hsl(270 80% 60% / 0.15), hsl(280 70% 50% / 0.08), transparent)"
+            }} />
+            <div className={`absolute inset-0 glass-card border-0 ${category === "scholarship" ? "" : ""}`} />
+            <div className="relative flex items-center gap-4">
+              <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                category === "scholarship"
+                  ? "bg-purple-500/20 shadow-lg shadow-purple-500/10"
+                  : "bg-muted/50"
+              }`}>
+                <GraduationCap className={`h-6 w-6 transition-colors ${category === "scholarship" ? "text-purple-400" : "text-muted-foreground"}`} />
+              </div>
+              <div className="text-left">
+                <p className={`text-2xl font-bold tabular-nums transition-colors ${
+                  category === "scholarship" ? "text-purple-300" : "text-muted-foreground"
+                }`}>{scholarshipCount}</p>
+                <p className={`text-sm font-medium transition-colors ${
+                  category === "scholarship" ? "text-foreground" : "text-muted-foreground"
+                }`}>Scholarships</p>
+              </div>
+            </div>
+            {category === "scholarship" && (
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] w-12 rounded-full"
+                style={{ background: "linear-gradient(90deg, hsl(270 80% 60%), hsl(280 70% 55%))" }} />
+            )}
+          </button>
+
+          <button
+            onClick={() => { setCategory("job"); setSelectedIds(new Set()); setSearch(""); setSelectedTags([]); }}
+            className={`group relative flex-1 rounded-2xl p-5 transition-all duration-300 overflow-hidden ${
+              category === "job"
+                ? "ring-2 ring-cyan-500/50"
+                : "hover:ring-1 hover:ring-border"
+            }`}
+          >
+            <div className={`absolute inset-0 transition-opacity duration-300 ${
+              category === "job" ? "opacity-100" : "opacity-0 group-hover:opacity-50"
+            }`} style={{
+              background: "linear-gradient(135deg, hsl(190 80% 50% / 0.15), hsl(200 70% 50% / 0.08), transparent)"
+            }} />
+            <div className={`absolute inset-0 glass-card border-0`} />
+            <div className="relative flex items-center gap-4">
+              <div className={`h-12 w-12 rounded-xl flex items-center justify-center transition-all duration-300 ${
+                category === "job"
+                  ? "bg-cyan-500/20 shadow-lg shadow-cyan-500/10"
+                  : "bg-muted/50"
+              }`}>
+                <Briefcase className={`h-6 w-6 transition-colors ${category === "job" ? "text-cyan-400" : "text-muted-foreground"}`} />
+              </div>
+              <div className="text-left">
+                <p className={`text-2xl font-bold tabular-nums transition-colors ${
+                  category === "job" ? "text-cyan-300" : "text-muted-foreground"
+                }`}>{jobCount}</p>
+                <p className={`text-sm font-medium transition-colors ${
+                  category === "job" ? "text-foreground" : "text-muted-foreground"
+                }`}>Job Applications</p>
+              </div>
+            </div>
+            {category === "job" && (
+              <div className="absolute bottom-0 left-1/2 -translate-x-1/2 h-[2px] w-12 rounded-full"
+                style={{ background: "linear-gradient(90deg, hsl(190 80% 50%), hsl(200 70% 55%))" }} />
+            )}
+          </button>
         </div>
 
         {/* Bulk actions bar */}
@@ -349,27 +437,27 @@ export default function Scholarships() {
             <span className="text-sm font-medium">{selectedIds.size} selected</span>
             <div className="flex-1" />
             {tab === "active" ? (
-              <Button variant="outline" size="sm" onClick={bulkArchive} className="gap-1">
+              <Button variant="outline" size="sm" onClick={bulkArchive} className="gap-1 rounded-xl">
                 <Archive className="h-3.5 w-3.5" /> Archive
               </Button>
             ) : (
-              <Button variant="outline" size="sm" onClick={bulkRestore} className="gap-1">
+              <Button variant="outline" size="sm" onClick={bulkRestore} className="gap-1 rounded-xl">
                 <ArchiveRestore className="h-3.5 w-3.5" /> Restore
               </Button>
             )}
-            <Button variant="destructive" size="sm" onClick={bulkDelete} className="gap-1">
+            <Button variant="destructive" size="sm" onClick={bulkDelete} className="gap-1 rounded-xl">
               <Trash2 className="h-3.5 w-3.5" /> Delete
             </Button>
-            <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())}>
+            <Button variant="ghost" size="sm" onClick={() => setSelectedIds(new Set())} className="rounded-xl">
               Clear
             </Button>
           </div>
         )}
 
-        {/* Tabs */}
+        {/* Active/Archived + Filters */}
         <Tabs value={tab} onValueChange={(v) => { setTab(v as "active" | "archived"); setSelectedIds(new Set()); }}>
           <Select value={tab} onValueChange={(v) => { setTab(v as "active" | "archived"); setSelectedIds(new Set()); }}>
-            <SelectTrigger className="w-auto gap-2 font-semibold text-sm">
+            <SelectTrigger className="w-auto gap-2 font-semibold text-sm rounded-xl">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -383,11 +471,11 @@ export default function Scholarships() {
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
               <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input placeholder="Search applications..." value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9" />
+                <Input placeholder={`Search ${category === 'scholarship' ? 'scholarships' : 'jobs'}...`} value={search} onChange={(e) => setSearch(e.target.value)} className="pl-9 rounded-xl" />
               </div>
               {tab === "active" && (
                 <Select value={statusFilter} onValueChange={setStatusFilter}>
-                  <SelectTrigger className="w-full sm:w-[160px]">
+                  <SelectTrigger className="w-full sm:w-[160px] rounded-xl">
                     <SelectValue placeholder="Status" />
                   </SelectTrigger>
                   <SelectContent>
@@ -401,7 +489,7 @@ export default function Scholarships() {
                 </Select>
               )}
               <Select value={sortBy} onValueChange={setSortBy}>
-                <SelectTrigger className="w-full sm:w-[160px]">
+                <SelectTrigger className="w-full sm:w-[160px] rounded-xl">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
                 <SelectContent>
@@ -412,7 +500,7 @@ export default function Scholarships() {
                   <SelectItem value="name">Name A-Z</SelectItem>
                 </SelectContent>
               </Select>
-              <Button variant="ghost" size="icon" onClick={() => setCompact(!compact)} title={compact ? "Detailed view" : "Compact view"}>
+              <Button variant="ghost" size="icon" onClick={() => setCompact(!compact)} title={compact ? "Detailed view" : "Compact view"} className="rounded-xl">
                 {compact ? <LayoutList className="h-4 w-4" /> : <LayoutGrid className="h-4 w-4" />}
               </Button>
             </div>
@@ -421,7 +509,7 @@ export default function Scholarships() {
             {allTags.length > 0 && (
               <div className="flex flex-wrap gap-1.5 items-center">
                 {allTags.slice(0, showAllTags ? allTags.length : 5).map((tag) => (
-                  <Badge key={tag} variant={selectedTags.includes(tag) ? "default" : "outline"} className="cursor-pointer" onClick={() => toggleTag(tag)}>
+                  <Badge key={tag} variant={selectedTags.includes(tag) ? "default" : "outline"} className="cursor-pointer rounded-lg" onClick={() => toggleTag(tag)}>
                     {tag}
                     {selectedTags.includes(tag) && <X className="h-3 w-3 ml-1" />}
                   </Badge>
@@ -434,55 +522,61 @@ export default function Scholarships() {
               </div>
             )}
 
-        {/* List */}
+            {/* List */}
             <DragDropContext onDragEnd={handleDragEnd}>
-            <TabsContent value="active" className="mt-0">
-              {loading ? (
-                <div className="flex justify-center py-12">
-                  <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
-                </div>
-              ) : filtered.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <p className="text-muted-foreground mb-4">No applications found</p>
-                    <Link to="/scholarships/new">
-                      <Button variant="outline"><Plus className="h-4 w-4 mr-2" /> Add Your First Application</Button>
-                    </Link>
-                  </CardContent>
-                </Card>
-              ) : isDragEnabled && !compact ? (
-                <Droppable droppableId="scholarships">
-                  {(provided) => (
-                    <div ref={provided.innerRef} {...provided.droppableProps} className="grid gap-2">
-                      {filtered.map((s, i) => renderCard(s, i))}
-                      {provided.placeholder}
-                    </div>
-                  )}
-                </Droppable>
-              ) : (
-                <div className={compact ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" : "grid gap-2"}>
-                  {filtered.map((s, i) => renderCard(s, i))}
-                </div>
-              )}
-            </TabsContent>
+              <TabsContent value="active" className="mt-0">
+                {loading ? (
+                  <div className="flex justify-center py-12">
+                    <div className="h-8 w-8 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+                  </div>
+                ) : filtered.length === 0 ? (
+                  <Card className="glass-card rounded-2xl border-0">
+                    <CardContent className="flex flex-col items-center justify-center py-16">
+                      {category === "scholarship" ? (
+                        <GraduationCap className="h-10 w-10 text-purple-400/30 mb-4" />
+                      ) : (
+                        <Briefcase className="h-10 w-10 text-cyan-400/30 mb-4" />
+                      )}
+                      <p className="text-muted-foreground mb-4">No {category === "scholarship" ? "scholarships" : "job applications"} yet</p>
+                      <Link to={`/scholarships/new?type=${category}`}>
+                        <Button variant="outline" className="rounded-xl">
+                          <Plus className="h-4 w-4 mr-2" /> Add {category === "scholarship" ? "Scholarship" : "Job Application"}
+                        </Button>
+                      </Link>
+                    </CardContent>
+                  </Card>
+                ) : isDragEnabled && !compact ? (
+                  <Droppable droppableId="scholarships">
+                    {(provided) => (
+                      <div ref={provided.innerRef} {...provided.droppableProps} className="grid gap-2">
+                        {filtered.map((s, i) => renderCard(s, i))}
+                        {provided.placeholder}
+                      </div>
+                    )}
+                  </Droppable>
+                ) : (
+                  <div className={compact ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" : "grid gap-2"}>
+                    {filtered.map((s, i) => renderCard(s, i))}
+                  </div>
+                )}
+              </TabsContent>
 
-            <TabsContent value="archived" className="mt-0">
-              {archivedScholarships.length === 0 ? (
-                <Card>
-                  <CardContent className="flex flex-col items-center justify-center py-12">
-                    <Archive className="h-8 w-8 text-muted-foreground/40 mb-3" />
-                    <p className="text-muted-foreground">No archived applications</p>
-                    <p className="text-xs text-muted-foreground/70 mt-1">Archive completed or inactive applications to keep your list clean</p>
-                  </CardContent>
-                </Card>
-              ) : filtered.length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-8">No archived applications match your search</p>
-              ) : (
-                <div className={compact ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" : "grid gap-2"}>
-                  {filtered.map((s, i) => renderCard(s, i))}
-                </div>
-              )}
-            </TabsContent>
+              <TabsContent value="archived" className="mt-0">
+                {archivedScholarships.length === 0 ? (
+                  <Card className="glass-card rounded-2xl border-0">
+                    <CardContent className="flex flex-col items-center justify-center py-12">
+                      <Archive className="h-8 w-8 text-muted-foreground/40 mb-3" />
+                      <p className="text-muted-foreground">No archived {category === "scholarship" ? "scholarships" : "jobs"}</p>
+                    </CardContent>
+                  </Card>
+                ) : filtered.length === 0 ? (
+                  <p className="text-sm text-muted-foreground text-center py-8">No archived applications match your search</p>
+                ) : (
+                  <div className={compact ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2" : "grid gap-2"}>
+                    {filtered.map((s, i) => renderCard(s, i))}
+                  </div>
+                )}
+              </TabsContent>
             </DragDropContext>
           </div>
         </Tabs>

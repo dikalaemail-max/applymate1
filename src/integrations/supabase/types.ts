@@ -289,6 +289,7 @@ export type Database = {
       scholarships: {
         Row: {
           amount: number | null
+          application_type: string
           created_at: string
           deadline: string | null
           eligibility_notes: string | null
@@ -308,6 +309,7 @@ export type Database = {
         }
         Insert: {
           amount?: number | null
+          application_type?: string
           created_at?: string
           deadline?: string | null
           eligibility_notes?: string | null
@@ -327,6 +329,7 @@ export type Database = {
         }
         Update: {
           amount?: number | null
+          application_type?: string
           created_at?: string
           deadline?: string | null
           eligibility_notes?: string | null

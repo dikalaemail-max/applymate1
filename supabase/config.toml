@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.ai-community-assist]
 verify_jwt = false
+
+[functions.pipeline-insights]
+verify_jwt = false

@@ -146,15 +146,15 @@ export default function Dashboard() {
 
         {/* Key Metrics — asymmetric: 1 large + 3 small */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          <Card className="glass-card rounded-2xl border-0 hover-lift col-span-2 lg:col-span-1 noise-texture">
+          <Card className="glass-card rounded-2xl border-0 hover-lift col-span-2 lg:col-span-1 noise-texture gradient-border">
             <CardContent className="pt-6 pb-5 px-6">
               <div className="flex items-start justify-between">
                 <div>
-                  <p className="text-4xl font-bold tracking-tighter tabular-nums">{loading ? "–" : total}</p>
+                  <p className="text-4xl font-bold tracking-tighter tabular-nums gradient-text">{loading ? "–" : total}</p>
                   <p className="text-xs text-muted-foreground mt-1.5 font-medium">Active Applications</p>
                 </div>
-                <div className="p-2.5 rounded-xl bg-foreground/5">
-                  <FolderOpen className="h-4 w-4 text-foreground/60" />
+                <div className="stat-card-icon">
+                  <FolderOpen className="h-4 w-4 text-primary" />
                 </div>
               </div>
               <p className="text-[10px] mt-3 text-muted-foreground">{loading ? "" : `${recentlyAdded} added this week`}</p>
@@ -165,15 +165,15 @@ export default function Dashboard() {
             { label: "Submitted", value: submitted, icon: Send, sub: `${inProgress} in progress` },
             { label: "Awarded", value: awarded, icon: Trophy, sub: totalAmount > 0 ? `$${totalAmount.toLocaleString()} won` : "Keep applying!" },
           ].map((stat) => (
-            <Card key={stat.label} className="glass-card rounded-2xl border-0 hover-lift">
+            <Card key={stat.label} className="glass-card rounded-2xl border-0 hover-lift gradient-border">
               <CardContent className="pt-5 pb-4 px-5">
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-3xl font-bold tracking-tight tabular-nums">{loading ? "–" : stat.value}</p>
                     <p className="text-xs text-muted-foreground mt-1 font-medium">{stat.label}</p>
                   </div>
-                  <div className={`p-2.5 rounded-xl ${stat.alert ? "bg-destructive/10" : "bg-foreground/5"}`}>
-                    <stat.icon className={`h-4 w-4 ${stat.alert ? "text-destructive" : "text-foreground/60"}`} />
+                  <div className={`stat-card-icon ${stat.alert ? "!bg-destructive/10" : ""}`}>
+                    <stat.icon className={`h-4 w-4 ${stat.alert ? "text-destructive" : "text-primary"}`} />
                   </div>
                 </div>
                 <p className={`text-[10px] mt-2 ${stat.alert ? "text-destructive font-semibold" : "text-muted-foreground"}`}>
@@ -212,7 +212,7 @@ export default function Dashboard() {
           <Card className="glass-card rounded-2xl border-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-foreground/5">
+                <div className="stat-card-icon">
                   <DollarSign className="h-3.5 w-3.5" />
                 </div>
                 Financial Overview
@@ -246,7 +246,7 @@ export default function Dashboard() {
           <Card className="glass-card rounded-2xl border-0">
             <CardHeader className="pb-2">
               <CardTitle className="text-base flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-foreground/5">
+                <div className="stat-card-icon">
                   <BarChart3 className="h-3.5 w-3.5" />
                 </div>
                 Progress
@@ -280,7 +280,7 @@ export default function Dashboard() {
             <Card className="glass-card rounded-2xl border-0 lg:col-span-2">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-foreground/5">
+                  <div className="stat-card-icon">
                     <Flame className="h-3.5 w-3.5" />
                   </div>
                   Application Pipeline
@@ -326,7 +326,7 @@ export default function Dashboard() {
             <Card className="glass-card rounded-2xl border-0">
               <CardHeader className="pb-2">
                 <CardTitle className="text-base flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-foreground/5">
+                  <div className="stat-card-icon">
                     <Award className="h-3.5 w-3.5" />
                   </div>
                   Profile Strength
@@ -366,7 +366,7 @@ export default function Dashboard() {
           <CardHeader>
             <div className="flex items-center justify-between">
               <CardTitle className="text-base flex items-center gap-2">
-                <div className="p-1.5 rounded-lg bg-foreground/5">
+                <div className="stat-card-icon">
                   <CalendarDays className="h-3.5 w-3.5" />
                 </div>
                 Upcoming Deadlines

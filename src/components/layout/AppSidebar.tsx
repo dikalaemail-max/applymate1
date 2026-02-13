@@ -30,11 +30,12 @@ export function AppSidebar() {
 
   return (
     <aside className="hidden md:flex w-64 flex-col bg-sidebar text-sidebar-foreground border-r border-sidebar-border relative overflow-hidden h-screen sticky top-0">
-      {/* Subtle glow at top */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 rounded-full bg-[hsl(var(--sidebar-primary))] opacity-[0.07] blur-3xl pointer-events-none" />
+      {/* Top glow */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-48 h-32 rounded-full opacity-[0.15] blur-3xl pointer-events-none"
+        style={{ background: 'linear-gradient(180deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)))' }} />
 
       <div className="relative flex items-center gap-3 px-6 py-5 border-b border-sidebar-border">
-        <ApplyMateLogo size="md" className="text-sidebar-foreground" />
+        <ApplyMateLogo size="md" className="text-primary" />
         <span className="text-xl font-bold tracking-tight" style={{ fontFamily: "'Space Grotesk', sans-serif" }}>
           ApplyMate
         </span>
@@ -50,12 +51,15 @@ export function AppSidebar() {
               className={cn(
                 "relative flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
                 active
-                  ? "text-sidebar-foreground"
+                  ? "text-sidebar-primary-foreground bg-sidebar-accent"
                   : "text-sidebar-foreground/50 hover:text-sidebar-foreground hover:bg-sidebar-accent/30"
               )}
             >
-              {active && <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-sidebar-foreground" />}
-              <item.icon className={cn("h-4 w-4 transition-colors", active && "text-sidebar-foreground")} />
+              {active && (
+                <div className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full"
+                  style={{ background: 'linear-gradient(180deg, hsl(var(--gradient-start)), hsl(var(--gradient-end)))' }} />
+              )}
+              <item.icon className={cn("h-4 w-4 transition-colors", active && "text-primary")} />
               {item.label}
             </Link>
           );
@@ -92,7 +96,7 @@ export function AppSidebar() {
 
       <div className="relative px-3 py-4 border-t border-sidebar-border">
         <div className="flex items-center gap-3 px-3 mb-3">
-          <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center text-xs font-bold text-white shadow-sm">
+          <div className="h-9 w-9 rounded-xl gradient-primary flex items-center justify-center text-xs font-bold text-white shadow-sm glow-sm">
             {user?.email?.[0]?.toUpperCase() ?? "?"}
           </div>
           <div className="flex-1 min-w-0">

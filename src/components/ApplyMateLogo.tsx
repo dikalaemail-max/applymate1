@@ -19,28 +19,34 @@ export function ApplyMateLogo({ className, size = "md" }: Props) {
       className={cn(sizes[size], className)}
       xmlns="http://www.w3.org/2000/svg"
     >
+      <defs>
+        <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stopColor="hsl(250 80% 65%)" />
+          <stop offset="100%" stopColor="hsl(320 70% 55%)" />
+        </linearGradient>
+      </defs>
       {/* Abstract "A" — two converging lines forming an upward arrow/compass */}
       <path
         d="M20 4L6 36"
-        stroke="currentColor"
+        stroke="url(#logoGrad)"
         strokeWidth="3.5"
         strokeLinecap="round"
       />
       <path
         d="M20 4L34 36"
-        stroke="currentColor"
+        stroke="url(#logoGrad)"
         strokeWidth="3.5"
         strokeLinecap="round"
       />
       {/* Crossbar */}
       <path
         d="M11 24H29"
-        stroke="currentColor"
+        stroke="url(#logoGrad)"
         strokeWidth="3"
         strokeLinecap="round"
       />
       {/* Dot at apex */}
-      <circle cx="20" cy="4" r="2.5" fill="currentColor" />
+      <circle cx="20" cy="4" r="2.5" fill="url(#logoGrad)" />
     </svg>
   );
 }
